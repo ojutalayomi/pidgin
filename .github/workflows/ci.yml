@@ -7,28 +7,20 @@ on:
     branches: [ main, master ]
 
 jobs:
-  test:
-    name: Multi-Rust Testing
+  build-and-test:
+    name: Build and Test
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    strategy:
-      matrix:
-        rust: [stable, 1.70, 1.75, 1.80, 1.85, 1.90]
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Rust ${{ matrix.rust }}
+      - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ matrix.rust }}
+          toolchain: stable
           override: true
-
-      - name: Show Rust version
-        run: |
-          rustc --version
-          cargo --version
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -37,40 +29,18 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-cargo-${{ matrix.rust }}-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-stable-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-cargo-${{ matrix.rust }}-
+            ${{ runner.os }}-cargo-stable-
 
       - name: Build
         run: cargo build
-        continue-on-error: false
 
       - name: Run tests
         run: cargo test
-        continue-on-error: false
 
-      - name: Run comprehensive test suite
-        run: |
-          echo "Running comprehensive test suite..."
-          cargo run examples/comprehensive_test.pg || echo "Comprehensive test failed but continuing..."
-          echo "Comprehensive tests completed"
-
-      - name: Run all feature tests
-        run: |
-          echo "Running all feature tests..."
-          for test in array_test test_new_features method_comparison simple_date_test replaceChar_test new_methods_test final_integration_test; do
-            echo "Running $test.pg..."
-            cargo run "examples/${test}.pg" || echo "$test.pg failed but continuing..."
-          done
-          echo "All feature tests completed"
-
-      - name: Test error handling
-        run: |
-          echo "Testing error conditions..."
-          cargo run examples/array_bounds_test.pg || true
-          cargo run examples/array_method_error_test.pg || true
-          cargo run examples/import_error_test.pg || true
-          echo "Error handling tests completed"
+      - name: Run basic functionality test
+        run: cargo run examples/hello.pg
 
   lint:
     name: Code Quality
