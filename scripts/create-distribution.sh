@@ -77,6 +77,107 @@ fi
 # Copy examples
 cp -r examples "pidgin-compiler-$PLATFORM/"
 
+# Copy installation script (for Unix-like systems)
+if [ "$OS" != "windows-latest" ]; then
+    if [ -f "install.sh" ]; then
+        echo "Copying install.sh"
+        cp install.sh "pidgin-compiler-$PLATFORM/"
+        chmod +x "pidgin-compiler-$PLATFORM/install.sh"
+    else
+        echo "Warning: install.sh not found, skipping"
+    fi
+fi
+
+# Create Windows installation script
+if [ "$OS" = "windows-latest" ]; then
+    echo "Creating Windows install.bat"
+    cat > "pidgin-compiler-$PLATFORM/install.bat" << 'EOF'
+@echo off
+REM Pidgin Compiler Windows Installation Script
+REM This script installs the pidgin-compiler to a system-wide location
+
+echo Installing Pidgin Compiler for Windows...
+
+REM Get the directory where this script is located
+set SCRIPT_DIR=%~dp0
+set EXECUTABLE=%SCRIPT_DIR%pidgin-compiler.exe
+
+REM Check if the executable exists
+if not exist "%EXECUTABLE%" (
+    echo Error: pidgin-compiler.exe not found in %SCRIPT_DIR%
+    echo Please make sure you're running this script from the correct directory.
+    pause
+    exit /b 1
+)
+
+REM Try to install to Program Files (requires admin privileges)
+set INSTALL_DIR=%ProgramFiles%\pidgin-compiler
+echo Attempting to install to: %INSTALL_DIR%
+
+REM Create installation directory
+if not exist "%INSTALL_DIR%" (
+    mkdir "%INSTALL_DIR%" 2>nul
+    if errorlevel 1 (
+        echo Failed to create installation directory. Trying alternative location...
+        set INSTALL_DIR=%USERPROFILE%\AppData\Local\pidgin-compiler
+        mkdir "%INSTALL_DIR%" 2>nul
+        if errorlevel 1 (
+            echo Failed to create installation directory: %INSTALL_DIR%
+            echo Please run this script as Administrator or choose a different location.
+            pause
+            exit /b 1
+        )
+    )
+)
+
+REM Copy executable
+copy "%EXECUTABLE%" "%INSTALL_DIR%\" >nul
+if errorlevel 1 (
+    echo Failed to copy executable to %INSTALL_DIR%
+    pause
+    exit /b 1
+)
+
+REM Copy examples
+if exist "%SCRIPT_DIR%examples" (
+    xcopy "%SCRIPT_DIR%examples" "%INSTALL_DIR%\examples\" /E /I /Y >nul
+)
+
+REM Add to PATH if not already there
+set PATH_CHECK=0
+for /f "tokens=*" %%i in ('echo %PATH%') do (
+    echo %%i | findstr /i "%INSTALL_DIR%" >nul
+    if not errorlevel 1 set PATH_CHECK=1
+)
+
+if %PATH_CHECK%==0 (
+    echo.
+    echo Installation completed successfully!
+    echo.
+    echo To use pidgin-compiler from anywhere, add this directory to your PATH:
+    echo %INSTALL_DIR%
+    echo.
+    echo You can do this by:
+    echo 1. Right-click on "This PC" or "My Computer"
+    echo 2. Select "Properties"
+    echo 3. Click "Advanced system settings"
+    echo 4. Click "Environment Variables"
+    echo 5. Under "System variables", find "Path" and click "Edit"
+    echo 6. Click "New" and add: %INSTALL_DIR%
+    echo 7. Click "OK" on all dialogs
+    echo.
+    echo After adding to PATH, you can run: pidgin-compiler.exe examples\hello.pg
+) else (
+    echo Installation completed successfully!
+    echo pidgin-compiler is now available as: pidgin-compiler.exe
+)
+
+echo.
+echo Installation complete!
+pause
+EOF
+fi
+
 # Create runner scripts
 if [ "$OS" = "windows-latest" ]; then
     cat > "pidgin-compiler-$PLATFORM/run.bat" << 'EOF'
@@ -226,6 +327,54 @@ else
 ```bash
 ./run.sh
 ```
+EOF
+fi
+
+cat >> "pidgin-compiler-$PLATFORM/README.md" << 'EOF'
+
+## Installation
+
+EOF
+
+if [ "$OS" = "windows-latest" ]; then
+    cat >> "pidgin-compiler-$PLATFORM/README.md" << 'EOF'
+### Windows Installation:
+You can install the compiler system-wide or use it locally:
+
+#### System-wide installation:
+```cmd
+install.bat
+```
+
+#### Local usage:
+```cmd
+run.bat examples\hello.pg
+```
+
+The installation script will:
+- Copy the executable to Program Files (requires admin privileges)
+- Fall back to user directory if admin access is not available
+- Provide instructions for adding to PATH
+- Make it available as `pidgin-compiler.exe` command
+EOF
+else
+    cat >> "pidgin-compiler-$PLATFORM/README.md" << 'EOF'
+### Unix-like Installation (Linux, macOS):
+You can install the compiler system-wide or use it locally:
+
+#### System-wide installation:
+```bash
+./install.sh
+```
+
+#### Local usage:
+```bash
+./run.sh examples/hello.pg
+```
+
+The installation script will:
+- Copy the executable to `/usr/local/bin/` (requires sudo)
+- Make it available as `pidgin-compiler` command
 EOF
 fi
 
