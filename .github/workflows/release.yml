@@ -51,18 +51,25 @@ jobs:
       - name: Build release
         run: cargo build --release --target ${{ matrix.target }}
 
-      - name: Create distribution
+      - name: Create distribution (Unix)
+        if: matrix.os != 'windows-latest'
         run: |
           chmod +x scripts/create-distribution.sh
           ./scripts/create-distribution.sh ${{ matrix.platform }} ${{ matrix.os }}
 
-      - name: Create zip archive
-        run: |
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            powershell Compress-Archive -Path "pidgin-compiler-${{ matrix.platform }}" -DestinationPath "${{ matrix.artifact_name }}.zip"
-          else
-            zip -r "${{ matrix.artifact_name }}.zip" "pidgin-compiler-${{ matrix.platform }}"
-          fi
+      - name: Create distribution (Windows)
+        if: matrix.os == 'windows-latest'
+        run: bash scripts/create-distribution.sh ${{ matrix.platform }} ${{ matrix.os }}
+        shell: bash
+
+      - name: Create zip archive (Windows)
+        if: matrix.os == 'windows-latest'
+        run: Compress-Archive -Path "pidgin-compiler-${{ matrix.platform }}" -DestinationPath "${{ matrix.artifact_name }}.zip"
+        shell: powershell
+
+      - name: Create zip archive (Unix)
+        if: matrix.os != 'windows-latest'
+        run: zip -r "${{ matrix.artifact_name }}.zip" "pidgin-compiler-${{ matrix.platform }}"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
