@@ -2,6 +2,7 @@ use crate::token::{TokenInfo}; // Import necessary types from the Token module
 use crate::ast::{Expr, Stmt, Program, BinaryOp, UnaryOp}; // Import AST types
 use std::collections::HashMap; // Import HashMap for variable storage
 use std::io::{self, Write};
+use std::fmt;
 use chrono::{DateTime, Local, Datelike};
 
 // Define a custom result type for handling returns
@@ -25,6 +26,40 @@ pub enum Value {
     Function(Vec<String>, Box<Stmt>), // Function value
 }
 
+// Implement Display trait for Value
+impl fmt::Display for Value {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Value::Number(n) => write!(f, "{}", n), // Convert number to string
+            Value::String(s) => write!(f, "{}", s), // Clone string
+            Value::Boolean(b) => write!(f, "{}", b), // Convert bool to string
+            Value::Nil => write!(f, "nil"), // Nil as "nil"
+            Value::Function(params, _body) => {
+                let params_str = params.join(", ");
+                write!(f, "function({params_str}) {{ ... }}")
+            }
+            Value::FixedArray(arr) => {
+                let elements = arr.iter().map(|v| v.to_string()).collect::<Vec<String>>().join(", ");
+                write!(f, "[{elements}]")
+            }
+            Value::DynamicArray(arr) => {
+                let elements = arr.iter().map(|v| v.to_string()).collect::<Vec<String>>().join(", ");
+                write!(f, "{{{elements}}}")
+            }
+            Value::Object(obj) => {
+                let mut pairs = Vec::new();
+                for (key, value) in obj {
+                    pairs.push(format!("{key}: {}", value));
+                }
+                write!(f, "{{ {} }}", pairs.join(", "))
+            }
+            Value::Date(dt) => {
+                write!(f, "{}", dt.format("%Y-%m-%d %H:%M:%S"))
+            }
+        }
+    }
+}
+
 // Implement methods for Value
 impl Value {
     // Check if the value is truthy (for conditionals)
@@ -33,38 +68,6 @@ impl Value {
             Value::Boolean(b) => *b, // Boolean: use its value
             Value::Nil => false, // Nil is always false
             _ => true, // All other values are truthy
-        }
-    }
-    
-    // Convert the value to a string for printing
-    fn to_string(&self) -> String {
-        match self {
-            Value::Number(n) => n.to_string(), // Convert number to string
-            Value::String(s) => s.clone(), // Clone string
-            Value::Boolean(b) => b.to_string(), // Convert bool to string
-            Value::Nil => "nil".to_string(), // Nil as "nil"
-            Value::Function(params, _body) => {
-                let params_str = params.join(", ");
-                format!("function({params_str}) {{ ... }}")
-            }
-            Value::FixedArray(arr) => {
-                let elements = arr.iter().map(|v| v.to_string()).collect::<Vec<String>>().join(", ");
-                format!("[{elements}]")
-            }
-            Value::DynamicArray(arr) => {
-                let elements = arr.iter().map(|v| v.to_string()).collect::<Vec<String>>().join(", ");
-                format!("{{{elements}}}")
-            }
-            Value::Object(obj) => {
-                let mut pairs = Vec::new();
-                for (key, value) in obj {
-                    pairs.push(format!("{key}: {}", value.to_string()));
-                }
-                format!("{{ {} }}", pairs.join(", "))
-            }
-            Value::Date(dt) => {
-                dt.format("%Y-%m-%d %H:%M:%S").to_string()
-            }
         }
     }
     
@@ -100,7 +103,7 @@ impl Interpreter {
     pub fn new(tokens: Option<Vec<TokenInfo>>) -> Self {
         Self {
             globals: HashMap::new(), // Start with empty globals
-            tokens: Some(tokens.unwrap_or(Vec::new())),
+            tokens: Some(tokens.unwrap_or_default()),
             current: 0, // Start at the first token
         }
     }
@@ -136,7 +139,7 @@ impl Interpreter {
                 
                 if arguments.is_empty() {
                     // Simple print: print value;
-                    println!("{}", format_value.to_string());
+                    println!("{}", format_value);
                 } else {
                     // Format string print: print "{}", value;
                     let format_str = match format_value {
@@ -829,7 +832,7 @@ impl Interpreter {
         }
         
         let value = self.evaluate_expr(&arguments[0])?;
-        eprintln!("{}", value.to_string());
+        eprintln!("{}", value);
         Ok(Value::Nil)
     }
     

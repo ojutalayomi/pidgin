@@ -37,7 +37,7 @@ impl Parser {
         if self.match_token(&Token::Get) { // Check for import statement
             return self.import_statement(); // Parse import statement
         }
-        if self.match_token(&Token::RETURN) { // Check for return statement
+        if self.match_token(&Token::Return) { // Check for return statement
             return self.return_statement(); // Parse return statement
         }
         if self.match_token(&Token::Print) { // Check for print statement

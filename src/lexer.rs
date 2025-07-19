@@ -286,7 +286,7 @@ impl Lexer {
             "function" => Token::Function, // function keyword
             "true" => Token::True, // true keyword
             "false" => Token::False, // false keyword
-            "return" => Token::RETURN,   // return keyword
+            "return" => Token::Return,   // return keyword
             "get" => Token::Get,   // get keyword for imports
             "from" => Token::From,   // from keyword for imports
             "<-" => Token::ArrowLeft,   // <- arrow token for imports

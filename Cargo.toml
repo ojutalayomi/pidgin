@@ -1,7 +1,6 @@
 [package]
 name = "pidgin-compiler"
 version = "0.1.16"
-authors = ["Ayomide Ojutalayo"]
 
 edition = "2021"
 

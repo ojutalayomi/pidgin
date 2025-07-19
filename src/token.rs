@@ -29,7 +29,7 @@ pub enum Token {
     Function, // 'function' keyword token
     True, // 'true' boolean literal token
     False, // 'false' boolean literal token
-    RETURN, // 'return' keyword token
+    Return, // 'return' keyword token
     Get, // 'get' keyword token for module imports
     From, // 'from' keyword token for module imports
     
