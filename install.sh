@@ -19,10 +19,21 @@ EXECUTABLE_NAME="pidgin-compiler"
 echo -e "${BLUE}Pidgin Compiler Installation${NC}"
 echo "================================"
 
-# Check if we have a release build
-if [ ! -f "target/release/pidgin-compiler" ]; then
-    echo -e "${YELLOW}No release build found. Building now...${NC}"
+# Check if we're in a distribution directory (has the executable directly)
+if [ -f "pidgin-compiler" ]; then
+    echo -e "${GREEN}Found executable in current directory.${NC}"
+    EXECUTABLE_PATH="pidgin-compiler"
+elif [ -f "target/release/pidgin-compiler" ]; then
+    echo -e "${GREEN}Found release build.${NC}"
+    EXECUTABLE_PATH="target/release/pidgin-compiler"
+else
+    echo -e "${YELLOW}No executable found. Building from source...${NC}"
+    if [ ! -f "Cargo.toml" ]; then
+        echo -e "${RED}Error: No Cargo.toml found. Please run this script from the project directory or distribution directory.${NC}"
+        exit 1
+    fi
     cargo build --release
+    EXECUTABLE_PATH="target/release/pidgin-compiler"
 fi
 
 # Check if running as root for system-wide installation
@@ -30,7 +41,7 @@ if [ "$EUID" -eq 0 ]; then
     echo -e "${GREEN}Installing Pidgin compiler system-wide...${NC}"
     
     # Copy the executable
-    cp target/release/pidgin-compiler "$INSTALL_DIR/$EXECUTABLE_NAME"
+    cp "$EXECUTABLE_PATH" "$INSTALL_DIR/$EXECUTABLE_NAME"
     chmod +x "$INSTALL_DIR/$EXECUTABLE_NAME"
     
     echo -e "${GREEN}✓ Pidgin compiler installed to $INSTALL_DIR/$EXECUTABLE_NAME${NC}"
@@ -56,7 +67,7 @@ else
     
     if [[ "$response" =~ ^[Yy]$ ]]; then
         mkdir -p "$LOCAL_DIR"
-        cp target/release/pidgin-compiler "$LOCAL_DIR/$EXECUTABLE_NAME"
+        cp "$EXECUTABLE_PATH" "$LOCAL_DIR/$EXECUTABLE_NAME"
         chmod +x "$LOCAL_DIR/$EXECUTABLE_NAME"
         
         echo -e "${GREEN}✓ Pidgin compiler installed to $LOCAL_DIR/$EXECUTABLE_NAME${NC}"
@@ -79,7 +90,7 @@ else
         echo -e "${BLUE}Manual installation:${NC}"
         echo "========================"
         echo "1. Copy the executable to a directory in your PATH:"
-        echo "   cp target/release/pidgin-compiler /path/to/directory/"
+        echo "   cp $EXECUTABLE_PATH /path/to/directory/"
         echo ""
         echo "2. Make it executable:"
         echo "   chmod +x /path/to/directory/pidgin-compiler"

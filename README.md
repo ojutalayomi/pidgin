@@ -185,8 +185,7 @@ sudo ./install.sh
 
 ## Future Enhancements
 
-- Functions and function calls
-- Arrays and objects
+- Objects
 - More data types (integers, floats)
 - Error recovery in parser
 - Code generation to bytecode or native code
