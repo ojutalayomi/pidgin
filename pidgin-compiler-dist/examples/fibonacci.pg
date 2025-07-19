@@ -1,0 +1,17 @@
+// Fibonacci sequence generator
+let n = 10;
+let a = 0;
+let b = 1;
+let count = 0;
+
+print "Fibonacci sequence up to " + n + " terms:";
+print a;
+print b;
+
+while (count < n - 2) {
+    let next = a + b;
+    print next;
+    a = b;
+    b = next;
+    count = count + 1;
+}

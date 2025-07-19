@@ -1,0 +1,6 @@
+function greet(name) {
+    print "Hello, " + name + "!";
+}
+
+greet("World");
+greet("Alice", "Bob");  // Too many arguments

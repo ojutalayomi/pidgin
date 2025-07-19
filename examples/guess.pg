@@ -1,0 +1,21 @@
+// Simple number analysis
+let number = 42;
+let guess = 30;
+
+print "The secret number is " + number;
+print "Your guess is " + guess;
+
+if (guess == number) {
+    print "Perfect! You guessed it!";
+} else {
+    if (guess < number) {
+        print "Too low! The number is higher.";
+        let diff = number - guess;
+        print "You were off by " + diff;
+    } else {
+        print "Too high! The number is lower.";
+        let diff = guess - number;
+        print "You were off by " + diff;
+        print ("Test".replaceChar`e -> u`);
+    }
+}

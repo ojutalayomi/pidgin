@@ -1,0 +1,11 @@
+let name = "John";
+print name.replaceChar`J -> B`;
+
+let name2 = "Isabella";
+print name2.replaceChar`I -> U`;
+
+let text = "Hello World";
+print text.replaceChar`l -> x`;
+
+let greeting = "Hi there";
+print greeting.replaceChar`Hi -> Hello`;

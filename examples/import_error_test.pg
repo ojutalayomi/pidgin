@@ -1,0 +1,10 @@
+// Test import error handling
+
+// This should work
+// GET Alpha from math.pg;
+
+// This should fail - trying to import lowercase name
+// GET alphabet from math.pg;
+
+// This should fail - trying to import non-existent module
+GET Beta from nonexistent.pg; 
