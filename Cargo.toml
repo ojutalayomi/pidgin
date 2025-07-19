@@ -1,7 +1,9 @@
 [package]
 name = "pidgin-compiler"
 version = "0.1.16"
-edition = "2024"
+authors = ["Ayomide Ojutalayo"]
+
+edition = "2021"
 
 [dependencies]
 chrono = { version = "0.4", features = ["serde"] }

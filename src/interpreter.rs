@@ -45,20 +45,20 @@ impl Value {
             Value::Nil => "nil".to_string(), // Nil as "nil"
             Value::Function(params, _body) => {
                 let params_str = params.join(", ");
-                format!("function({}) {{ ... }}", params_str)
+                format!("function({params_str}) {{ ... }}")
             }
             Value::FixedArray(arr) => {
                 let elements = arr.iter().map(|v| v.to_string()).collect::<Vec<String>>().join(", ");
-                format!("[{}]", elements)
+                format!("[{elements}]")
             }
             Value::DynamicArray(arr) => {
                 let elements = arr.iter().map(|v| v.to_string()).collect::<Vec<String>>().join(", ");
-                format!("{{{}}}", elements)
+                format!("{{{elements}}}")
             }
             Value::Object(obj) => {
                 let mut pairs = Vec::new();
                 for (key, value) in obj {
-                    pairs.push(format!("{}: {}", key, value.to_string()));
+                    pairs.push(format!("{key}: {}", value.to_string()));
                 }
                 format!("{{ {} }}", pairs.join(", "))
             }
@@ -236,7 +236,7 @@ impl Interpreter {
                 if let Some(value) = self.globals.get(name) {
                     Ok(value.clone()) // Return variable value if found
                 } else {
-                    Err(format!("Undefined variable '{}'", name)) // Error if not found
+                    Err(format!("Undefined variable '{name}'")) // Error if not found
                 }
             }
             Expr::FixedArray(elements) => {
@@ -265,7 +265,7 @@ impl Interpreter {
                 match array_val {
                     Value::FixedArray(arr) | Value::DynamicArray(arr) => {
                         if index_num >= arr.len() {
-                            Err(format!("Array index {} out of bounds (array length: {})", index_num, arr.len()))
+                            Err(format!("Array index {index_num} out of bounds (array length: {})", arr.len()))
                         } else {
                             Ok(arr[index_num].clone())
                         }
@@ -280,25 +280,25 @@ impl Interpreter {
                 match operator {
                     BinaryOp::Add => match (left_val, right_val) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a + b)), // Add numbers
-                        (Value::String(a), Value::String(b)) => Ok(Value::String(format!("{}{}", a, b))), // Concatenate strings
-                        (Value::String(a), Value::Number(b)) => Ok(Value::String(format!("{}{}", a, b))), // String + number
-                        (Value::Number(a), Value::String(b)) => Ok(Value::String(format!("{}{}", a, b))), // Number + string
-                        (Value::String(a), Value::Boolean(b)) => Ok(Value::String(format!("{}{}", a, b))), // String + bool
-                        (Value::Boolean(a), Value::String(b)) => Ok(Value::String(format!("{}{}", a, b))), // Bool + string
+                        (Value::String(a), Value::String(b)) => Ok(Value::String(format!("{a}{b}"))), // Concatenate strings
+                        (Value::String(a), Value::Number(b)) => Ok(Value::String(format!("{a}{b}"))), // String + number
+                        (Value::Number(a), Value::String(b)) => Ok(Value::String(format!("{a}{b}"))), // Number + string
+                        (Value::String(a), Value::Boolean(b)) => Ok(Value::String(format!("{a}{b}"))), // String + bool
+                        (Value::Boolean(a), Value::String(b)) => Ok(Value::String(format!("{a}{b}"))), // Bool + string
                         _ => {
-                            Err(format!("Invalid operands for addition: {:?} + {:?} at line {} column {}", left_val, right_val, line, column))
+                            Err(format!("Invalid operands for addition: {left_val:?} + {right_val:?} at line {line} column {column}"))
                         }
                     },
                     BinaryOp::Subtract => match (left_val, right_val) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a - b)), // Subtract numbers
                         _ => {
-                            Err(format!("Invalid operands for subtraction: {:?} - {:?} at line {} column {}", left_val, right_val, line, column))
+                            Err(format!("Invalid operands for subtraction: {left_val:?} - {right_val:?} at line {line} column {column}"))
                         }
                     },
                     BinaryOp::Multiply => match (left_val, right_val) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a * b)), // Multiply numbers
                         _ => {
-                            Err(format!("Invalid operands for multiplication: {:?} * {:?} at line {} column {}", left_val, right_val, line, column))
+                            Err(format!("Invalid operands for multiplication: {left_val:?} * {right_val:?} at line {line} column {column}"))
                         }
                     },
                     BinaryOp::Divide => match (left_val, right_val) {
@@ -310,7 +310,7 @@ impl Interpreter {
                             }
                         }
                         _ => {
-                            Err(format!("Invalid operands for division: {:?} / {:?} at line {} column {}", left_val, right_val, line, column))
+                            Err(format!("Invalid operands for division: {left_val:?} / {right_val:?} at line {line} column {column}"))
                         }
                     },
                     BinaryOp::Equal => Ok(Value::Boolean(left_val.is_equal(right_val))), // Equality check
@@ -318,25 +318,25 @@ impl Interpreter {
                     BinaryOp::Greater => match (left_val, right_val) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Boolean(a > b)), // Greater than
                         _ => {
-                            Err(format!("Invalid operands for comparison: {:?} > {:?} at line {} column {}", left_val, right_val, line, column))
+                            Err(format!("Invalid operands for comparison: {left_val:?} > {right_val:?} at line {line} column {column}"))
                         }
                     },
                     BinaryOp::GreaterEqual => match (left_val, right_val) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Boolean(a >= b)), // Greater or equal
                         _ => {
-                            Err(format!("Invalid operands for comparison: {:?} >= {:?} at line {} column {}", left_val, right_val, line, column))
+                            Err(format!("Invalid operands for comparison: {left_val:?} >= {right_val:?} at line {line} column {column}"))
                         }
                     },
                     BinaryOp::Less => match (left_val, right_val) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Boolean(a < b)), // Less than
                         _ => {
-                            Err(format!("Invalid operands for comparison: {:?} < {:?} at line {} column {}", left_val, right_val, line, column))
+                            Err(format!("Invalid operands for comparison: {left_val:?} < {right_val:?} at line {line} column {column}"))
                         }
                     },
                     BinaryOp::LessEqual => match (left_val, right_val) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Boolean(a <= b)), // Less or equal
                         _ => {
-                            Err(format!("Invalid operands for comparison: {:?} <= {:?} at line {} column {}", left_val, right_val, line, column))
+                            Err(format!("Invalid operands for comparison: {left_val:?} <= {right_val:?} at line {line} column {column}"))
                         }
                     },
                 }
@@ -373,7 +373,7 @@ impl Interpreter {
                                         Value::String(s) => s.clone(),
                                         Value::Number(n) => n.to_string(),
                                         Value::Boolean(b) => b.to_string(),
-                                        _ => return Err(format!("Variable '{}' is not a valid replacement value", from)),
+                                        _ => return Err(format!("Variable '{from}' is not a valid replacement value")),
                                     }
                                 } else {
                                     from.clone() // Use as literal if not a variable
@@ -384,7 +384,7 @@ impl Interpreter {
                                         Value::String(s) => s.clone(),
                                         Value::Number(n) => n.to_string(),
                                         Value::Boolean(b) => b.to_string(),
-                                        _ => return Err(format!("Variable '{}' is not a valid replacement value", to)),
+                                        _ => return Err(format!("Variable '{to}' is not a valid replacement value")),
                                     }
                                 } else {
                                     to.clone() // Use as literal if not a variable
@@ -524,7 +524,7 @@ impl Interpreter {
                                 if let (Expr::Number(index), _) = (left.as_ref(), right.as_ref()) {
                                     let index = *index as usize;
                                     if index > arr.len() {
-                                        return Err(format!("Insert index {} out of bounds (array length: {})", index, arr.len()));
+                                        return Err(format!("Insert index {index} out of bounds (array length: {})", arr.len()));
                                     }
                                     let value = self.evaluate_expr(right)?;
                                     arr.insert(index, value);
@@ -545,7 +545,7 @@ impl Interpreter {
                             if let Expr::Number(index) = argument.as_ref() {
                                 let index = *index as usize;
                                 if index >= arr.len() {
-                                    return Err(format!("Remove index {} out of bounds (array length: {})", index, arr.len()));
+                                    return Err(format!("Remove index {index} out of bounds (array length: {})", arr.len()));
                                 }
                                 let removed = arr.remove(index);
                                 Ok(removed)
@@ -660,7 +660,7 @@ impl Interpreter {
                             Err("has method can only be called on objects".to_string())
                         }
                     },
-                    _ => Err(format!("Unsupported method: {}", method))
+                    _ => Err(format!("Unsupported method: {method}"))
                 }
             }
             Expr::Transform { from: _, to: _ } => {
@@ -689,7 +689,7 @@ impl Interpreter {
                 let function = if let Some(Value::Function(params, body)) = self.globals.get(name).cloned() {
                     (params, body)
                 } else {
-                    return Err(format!("Undefined function '{}'", name));
+                    return Err(format!("Undefined function '{name}'"));
                 };
                 
                 let (params, body) = function;
@@ -697,8 +697,7 @@ impl Interpreter {
                 // Check argument count
                 if arguments.len() != params.len() {
                     return Err(format!(
-                        "Function '{}' expects {} arguments, got {}",
-                        name,
+                        "Function '{name}' expects {} arguments, got {}",
                         params.len(),
                         arguments.len()
                     ));
@@ -753,20 +752,20 @@ impl Interpreter {
             if Path::new(&examples_path).exists() {
                 examples_path
             } else {
-                return Err(format!("Module '{}' not found. Tried: {}, {}", module_path, full_path, examples_path));
+                return Err(format!("Module '{module_path}' not found. Tried: {full_path}, {examples_path}"));
             }
         };
         
         // Read the module file
         let source = fs::read_to_string(&module_file)
-            .map_err(|e| format!("Failed to read module '{}': {}", module_file, e))?;
+            .map_err(|e| format!("Failed to read module '{module_file}': {e}"))?;
         
         // Parse the module
         let mut lexer = Lexer::new(&source);
         let tokens = lexer.tokenize();
         let mut parser = Parser::new(tokens);
         let program = parser.parse()
-            .map_err(|e| format!("Failed to parse module '{}': {}", module_file, e))?;
+            .map_err(|e| format!("Failed to parse module '{module_file}': {e}"))?;
         
         // Create a temporary interpreter to execute the module
         let mut module_interpreter = Interpreter::new(None);
@@ -788,10 +787,10 @@ impl Interpreter {
                 if name.chars().next().map(|c| c.is_uppercase()).unwrap_or(false) {
                     self.globals.insert(name.clone(), value.clone());
                 } else {
-                    return Err(format!("Cannot import '{}' - only names starting with uppercase letters can be imported", name));
+                    return Err(format!("Cannot import '{name}' - only names starting with uppercase letters can be imported"));
                 }
             } else {
-                return Err(format!("Name '{}' not found in module '{}'", name, module_file));
+                return Err(format!("Name '{name}' not found in module '{module_file}'"));
             }
         }
         
@@ -819,7 +818,7 @@ impl Interpreter {
                 }
                 Ok(Value::String(input))
             }
-            Err(e) => Err(format!("Error reading input: {}", e)),
+            Err(e) => Err(format!("Error reading input: {e}")),
         }
     }
     
@@ -855,7 +854,7 @@ impl Interpreter {
                         let naive = naive_date.and_hms_opt(0, 0, 0).unwrap();
                         Ok(Value::Date(Local.from_local_datetime(&naive).single().unwrap_or(Local::now())))
                     } else {
-                        Err(format!("Unable to parse date: '{}'", s))
+                        Err(format!("Unable to parse date: '{s}'"))
                     }
                 } else {
                     Err("Date() argument must be a string".to_string())

@@ -1,5 +1,6 @@
 target
 pidgin-compiler-Darwin-x86_64.zip
+pidgin-compiler-macos-x86_64.zip
 pidgin-compiler-dist/pidgin-compiler
 pidgin-compiler-dist/examples
 pidgin-compiler-dist/run.bat

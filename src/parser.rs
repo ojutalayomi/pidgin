@@ -133,7 +133,7 @@ impl Parser {
                 self.advance(); 
             },
             _ => {
-                return Err(format!("Expect 'from' or '<-' after import names, got {:?} at line {} column {}", from_token.token, from_token.line, from_token.column));
+                return Err(format!("Expect 'from' or '<-' after import names, got {from_token:?} at line {line} column {column}", from_token = from_token.token, line = from_token.line, column = from_token.column));
             }
         }
         
@@ -536,7 +536,7 @@ impl Parser {
                 self.consume(&Token::RightParen, "Expect ')' after argument")?;
                 arg
             } else {
-                return Err(format!("Unsupported method: {}", method_name));
+                return Err(format!("Unsupported method: {method_name}"));
             };
             
             expr = Expr::MethodCall {
@@ -570,7 +570,7 @@ impl Parser {
                 self.consume(&Token::RightBrace, "Expect '}' after variable name")?;
                 Ok(var)
             } else {
-                Err(format!("Expect variable name in transform"))
+                Err("Expect variable name in transform".to_string())
             }
         } else {
             // Continue without requiring {var}
@@ -579,7 +579,7 @@ impl Parser {
                 self.advance();
                 Ok(var)
             } else {
-                Err(format!("Expect '{}' pattern in transform", transform_type))
+                Err(format!("Expect '{transform_type}' pattern in transform"))
             }
         }
     }
@@ -631,7 +631,7 @@ impl Parser {
         if self.check(token_type) {
             Ok(self.advance()) // Return the token
         } else {
-            Err(format!("{} at line {} column {}", message, self.peek().line, self.peek().column)) // Error if not matched
+            Err(format!("{message} at line {line} column {column}", line = self.peek().line, column = self.peek().column)) // Error if not matched
         }
     }
 
@@ -640,7 +640,7 @@ impl Parser {
         let token = self.advance(); // Get the next token
         match &token.token {
             Token::Identifier(_) => Ok(token), // Return if it's an identifier
-            _ => Err(format!("{} at line {} column {}", message, token.line, token.column)), // Error otherwise
+            _ => Err(format!("{message} at line {line} column {column}", line = token.line, column = token.column)), // Error otherwise
         }
     }
 }
