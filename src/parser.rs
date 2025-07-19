@@ -1,6 +1,6 @@
 // Import necessary modules and types
-use crate::token::{Token, TokenInfo}; // Import Token and TokenInfo from token.rs
-use crate::ast::{Expr, Stmt, Program, BinaryOp, UnaryOp}; // Import AST types
+use crate::ast::{BinaryOp, Expr, Program, Stmt, UnaryOp};
+use crate::token::{Token, TokenInfo}; // Import Token and TokenInfo from token.rs // Import AST types
 
 // Define the Parser struct, which will parse tokens into an AST
 pub struct Parser {
@@ -13,15 +13,16 @@ impl Parser {
     // Create a new Parser from a vector of tokens
     pub fn new(tokens: Vec<TokenInfo>) -> Self {
         Self {
-            tokens,      // Store the tokens
-            current: 0,  // Start at the first token
+            tokens,     // Store the tokens
+            current: 0, // Start at the first token
         }
     }
 
     // Parse the tokens into a Program (AST root)
     pub fn parse(&mut self) -> Result<Program, String> {
         let mut statements = Vec::new(); // Store parsed statements
-        while !self.is_at_end() { // Loop until all tokens are parsed
+        while !self.is_at_end() {
+            // Loop until all tokens are parsed
             // Skip newlines at the top level
             if self.check(&Token::Newline) {
                 self.advance();
@@ -34,28 +35,36 @@ impl Parser {
 
     // Parse a statement
     fn statement(&mut self) -> Result<Stmt, String> {
-        if self.match_token(&Token::Get) { // Check for import statement
+        if self.match_token(&Token::Get) {
+            // Check for import statement
             return self.import_statement(); // Parse import statement
         }
-        if self.match_token(&Token::Return) { // Check for return statement
+        if self.match_token(&Token::Return) {
+            // Check for return statement
             return self.return_statement(); // Parse return statement
         }
-        if self.match_token(&Token::Print) { // Check for print statement
+        if self.match_token(&Token::Print) {
+            // Check for print statement
             return self.print_statement(); // Parse print statement
         }
-        if self.match_token(&Token::Let) { // Check for variable declaration
+        if self.match_token(&Token::Let) {
+            // Check for variable declaration
             return self.var_declaration(); // Parse variable declaration
         }
-        if self.match_token(&Token::Function) { // Check for function declaration
+        if self.match_token(&Token::Function) {
+            // Check for function declaration
             return self.function_declaration(); // Parse function declaration
         }
-        if self.match_token(&Token::If) { // Check for if statement
+        if self.match_token(&Token::If) {
+            // Check for if statement
             return self.if_statement(); // Parse if statement
         }
-        if self.match_token(&Token::While) { // Check for while statement
+        if self.match_token(&Token::While) {
+            // Check for while statement
             return self.while_statement(); // Parse while statement
         }
-        if self.match_token(&Token::LeftBrace) { // Check for block statement
+        if self.match_token(&Token::LeftBrace) {
+            // Check for block statement
             return self.block_statement(); // Parse block statement
         }
         self.expression_statement() // Otherwise, parse as expression statement
@@ -81,9 +90,12 @@ impl Parser {
             }
             (format_expr, arguments)
         };
-    
+
         self.consume(&Token::Semicolon, "Expect ';' after value.")?;
-        Ok(Stmt::Print { format: format_expr, arguments })
+        Ok(Stmt::Print {
+            format: format_expr,
+            arguments,
+        })
     }
 
     // Parse a return statement
@@ -96,7 +108,7 @@ impl Parser {
     // Parse an import statement
     fn import_statement(&mut self) -> Result<Stmt, String> {
         let mut names = Vec::new();
-        
+
         // Parse the names to import
         if self.match_token(&Token::LeftBrace) {
             // Multiple names: GET {Alpha,B} from math.pg;
@@ -107,7 +119,7 @@ impl Parser {
                 } else {
                     return Err("Invalid identifier in import list".to_string());
                 }
-                
+
                 if !self.match_token(&Token::Comma) {
                     break;
                 }
@@ -122,24 +134,24 @@ impl Parser {
                 return Err("Invalid identifier after GET".to_string());
             }
         }
-        
+
         // Parse "from" or "<-" keyword
         let from_token = self.peek();
         match &from_token.token {
             Token::From => {
                 self.advance();
-            },
+            }
             Token::ArrowLeft => {
-                self.advance(); 
-            },
+                self.advance();
+            }
             _ => {
                 return Err(format!("Expect 'from' or '<-' after import names, got {from_token:?} at line {line} column {column}", from_token = from_token.token, line = from_token.line, column = from_token.column));
             }
         }
-        
+
         // Parse module path (handle dot notation)
         let mut module_parts = Vec::new();
-        
+
         // First part of the path
         let first_part = self.consume_identifier("Expect module path")?;
         if let Token::Identifier(part) = &first_part.token {
@@ -147,21 +159,22 @@ impl Parser {
         } else {
             return Err("Invalid module path".to_string());
         }
-        
+
         // Handle additional parts with dots (e.g., math.pg)
         while self.match_token(&Token::Dot) {
-            let part_token = self.consume_identifier("Expect identifier after dot in module path")?;
+            let part_token =
+                self.consume_identifier("Expect identifier after dot in module path")?;
             if let Token::Identifier(part) = &part_token.token {
                 module_parts.push(part.clone());
             } else {
                 return Err("Invalid identifier after dot in module path".to_string());
             }
         }
-        
+
         let module = module_parts.join(".");
-        
+
         self.consume(&Token::Semicolon, "Expect ';' after import statement")?;
-        
+
         Ok(Stmt::Import { names, module })
     }
 
@@ -173,7 +186,8 @@ impl Parser {
         } else {
             return Err("Invalid variable name.".to_string()); // Error if not an identifier
         };
-        let initializer = if self.match_token(&Token::Assign) { // Check for initializer
+        let initializer = if self.match_token(&Token::Assign) {
+            // Check for initializer
             Some(self.expression()?) // Parse the initializer expression
         } else {
             None // No initializer
@@ -190,11 +204,11 @@ impl Parser {
         } else {
             return Err("Invalid function name.".to_string()); // Error if not an identifier
         };
-        
+
         self.consume(&Token::LeftParen, "Expect '(' after function name.")?; // Expect '('
-        
+
         let mut parameters = Vec::new(); // Store parameter names
-        
+
         // Parse parameters
         if !self.check(&Token::RightParen) {
             loop {
@@ -204,19 +218,21 @@ impl Parser {
                 } else {
                     return Err("Invalid parameter name.".to_string()); // Error if not identifier
                 }
-                
-                if !self.match_token(&Token::Comma) { // Check for comma
+
+                if !self.match_token(&Token::Comma) {
+                    // Check for comma
                     break; // No comma, end of parameters
                 }
             }
         }
-        
+
         self.consume(&Token::RightParen, "Expect ')' after parameters.")?; // Expect ')'
-        
+
         self.consume(&Token::LeftBrace, "Expect '{' before function body.")?; // Expect '{'
-        
+
         let mut body_statements = Vec::new(); // Store statements in the function body
-        while !self.check(&Token::RightBrace) && !self.is_at_end() { // Loop until '}' or end
+        while !self.check(&Token::RightBrace) && !self.is_at_end() {
+            // Loop until '}' or end
             // Skip newlines in function body
             if self.check(&Token::Newline) {
                 self.advance();
@@ -225,10 +241,14 @@ impl Parser {
             body_statements.push(self.statement()?); // Parse and add each statement
         }
         self.consume(&Token::RightBrace, "Expect '}' after function body.")?; // Expect '}'
-        
+
         let body = Box::new(Stmt::Block(body_statements)); // Create block statement
-        
-        Ok(Stmt::FunctionDeclaration { name, parameters, body }) // Return function declaration
+
+        Ok(Stmt::FunctionDeclaration {
+            name,
+            parameters,
+            body,
+        }) // Return function declaration
     }
 
     // Parse an if statement
@@ -237,12 +257,17 @@ impl Parser {
         let condition = self.expression()?; // Parse the condition expression
         self.consume(&Token::RightParen, "Expect ')' after if condition.")?; // Expect ')'
         let then_branch = Box::new(self.statement()?); // Parse the then branch
-        let else_branch = if self.match_token(&Token::Else) { // Check for else branch
+        let else_branch = if self.match_token(&Token::Else) {
+            // Check for else branch
             Some(Box::new(self.statement()?)) // Parse the else branch
         } else {
             None // No else branch
         };
-        Ok(Stmt::If { condition, then_branch, else_branch }) // Return an If statement
+        Ok(Stmt::If {
+            condition,
+            then_branch,
+            else_branch,
+        }) // Return an If statement
     }
 
     // Parse a while statement
@@ -257,7 +282,8 @@ impl Parser {
     // Parse a block statement (a sequence of statements in braces)
     fn block_statement(&mut self) -> Result<Stmt, String> {
         let mut statements = Vec::new(); // Store statements in the block
-        while !self.check(&Token::RightBrace) && !self.is_at_end() { // Loop until '}' or end
+        while !self.check(&Token::RightBrace) && !self.is_at_end() {
+            // Loop until '}' or end
             // Skip newlines in block
             if self.check(&Token::Newline) {
                 self.advance();
@@ -284,11 +310,15 @@ impl Parser {
     // Parse an assignment expression
     fn assignment(&mut self) -> Result<Expr, String> {
         let expr = self.equality()?; // Parse equality expression
-        if self.match_token(&Token::Assign) { // Check for assignment
+        if self.match_token(&Token::Assign) {
+            // Check for assignment
             let _equals = self.previous(); // Get the '=' token
             let value = self.assignment()?; // Parse the right-hand side
             if let Expr::Identifier(name) = expr {
-                return Ok(Expr::Assignment { name, value: Box::new(value) }); // Return Assignment expression
+                return Ok(Expr::Assignment {
+                    name,
+                    value: Box::new(value),
+                }); // Return Assignment expression
             }
             return Err("Invalid assignment target.".to_string()); // Error if not an identifier
         }
@@ -298,12 +328,13 @@ impl Parser {
     // Parse an equality expression (==, !=)
     fn equality(&mut self) -> Result<Expr, String> {
         let mut expr = self.comparison()?; // Parse comparison expression
-        while self.match_token(&Token::Equal) || self.match_token(&Token::NotEqual) { // Loop for == or !=
+        while self.match_token(&Token::Equal) || self.match_token(&Token::NotEqual) {
+            // Loop for == or !=
             let previous_token = self.previous();
             let operator = match previous_token.token {
-                Token::Equal => BinaryOp::Equal, // Map to BinaryOp::Equal
+                Token::Equal => BinaryOp::Equal,       // Map to BinaryOp::Equal
                 Token::NotEqual => BinaryOp::NotEqual, // Map to BinaryOp::NotEqual
-                _ => unreachable!(), // Should not happen
+                _ => unreachable!(),                   // Should not happen
             };
             let right = self.comparison()?; // Parse right operand
             expr = Expr::Binary {
@@ -327,11 +358,11 @@ impl Parser {
         {
             let previous_token = self.previous();
             let operator = match previous_token.token {
-                Token::Less => BinaryOp::Less, // Map to BinaryOp::Less
-                Token::LessEqual => BinaryOp::LessEqual, // Map to BinaryOp::LessEqual
-                Token::Greater => BinaryOp::Greater, // Map to BinaryOp::Greater
+                Token::Less => BinaryOp::Less,                 // Map to BinaryOp::Less
+                Token::LessEqual => BinaryOp::LessEqual,       // Map to BinaryOp::LessEqual
+                Token::Greater => BinaryOp::Greater,           // Map to BinaryOp::Greater
                 Token::GreaterEqual => BinaryOp::GreaterEqual, // Map to BinaryOp::GreaterEqual
-                _ => unreachable!(), // Should not happen
+                _ => unreachable!(),                           // Should not happen
             };
             let right = self.term()?; // Parse right operand
             expr = Expr::Binary {
@@ -351,9 +382,9 @@ impl Parser {
         while self.match_token(&Token::Plus) || self.match_token(&Token::Minus) {
             let previous_token = self.previous();
             let operator = match previous_token.token {
-                Token::Plus => BinaryOp::Add, // Map to BinaryOp::Add
+                Token::Plus => BinaryOp::Add,       // Map to BinaryOp::Add
                 Token::Minus => BinaryOp::Subtract, // Map to BinaryOp::Subtract
-                _ => unreachable!(), // Should not happen
+                _ => unreachable!(),                // Should not happen
             };
             let right = self.factor()?; // Parse right operand
             expr = Expr::Binary {
@@ -374,8 +405,8 @@ impl Parser {
             let previous_token = self.previous();
             let operator = match previous_token.token {
                 Token::Star => BinaryOp::Multiply, // Map to BinaryOp::Multiply
-                Token::Slash => BinaryOp::Divide, // Map to BinaryOp::Divide
-                _ => unreachable!(), // Should not happen
+                Token::Slash => BinaryOp::Divide,  // Map to BinaryOp::Divide
+                _ => unreachable!(),               // Should not happen
             };
             let right = self.unary()?; // Parse right operand
             expr = Expr::Binary {
@@ -408,14 +439,14 @@ impl Parser {
         let mut expr = match &token.token {
             Token::Number(n) => Ok(Expr::Number(*n)), // Numeric literal
             Token::String(s) => Ok(Expr::String(s.clone())), // String literal
-            Token::True => Ok(Expr::Boolean(true)), // true literal
+            Token::True => Ok(Expr::Boolean(true)),   // true literal
             Token::False => Ok(Expr::Boolean(false)), // false literal
             Token::Identifier(name) => Ok(Expr::Identifier(name.clone())), // Identifier
             Token::LeftParen => {
                 let expr = self.expression()?; // Parse the inner expression
                 self.consume(&Token::RightParen, "Expect ')' after expression.")?; // Expect ')'
                 Ok(expr) // Return the inner expression
-            },
+            }
             Token::LeftBracket => {
                 // Parse fixed-size array: [a, b, c]
                 let mut elements = Vec::new();
@@ -444,13 +475,13 @@ impl Parser {
                 self.consume(&Token::RightBrace, "Expect '}' after array elements.")?;
                 Ok(Expr::DynamicArray(elements))
             }
-                _ => Err("Expect expression.".to_string()), // Error for invalid primary
-            }?;
-        
+            _ => Err("Expect expression.".to_string()), // Error for invalid primary
+        }?;
+
         // Check for function calls
         while self.check(&Token::LeftParen) {
             self.advance(); // consume '('
-            
+
             // Parse arguments
             let mut arguments = Vec::new();
             if !self.check(&Token::RightParen) {
@@ -461,9 +492,9 @@ impl Parser {
                     }
                 }
             }
-            
+
             self.consume(&Token::RightParen, "Expect ')' after arguments.")?;
-            
+
             // Convert identifier to function call
             if let Expr::Identifier(name) = expr {
                 expr = Expr::FunctionCall { name, arguments };
@@ -471,7 +502,7 @@ impl Parser {
                 return Err("Only identifiers can be called as functions.".to_string());
             }
         }
-        
+
         // Check for method calls
         while self.check(&Token::Dot) {
             self.advance(); // consume '.'
@@ -481,19 +512,19 @@ impl Parser {
                 _ => return Err("Expect method name after '.'.".to_string()),
             };
             self.advance(); // consume method name
-            
+
             // Parse method arguments based on method type
             let argument = if method_name == "replaceChar" {
                 // Special case for replaceChar with backtick syntax
                 self.consume(&Token::Backtick, "Expect '`' after 'replaceChar'")?;
                 let from = self.parse_transform("from")?;
-                
+
                 self.consume(&Token::Arrow, "Expect '->' in transform")?;
 
                 let to = self.parse_transform("to")?;
-                
+
                 self.consume(&Token::Backtick, "Expect '`' to close transform")?;
-                
+
                 Expr::Transform { from, to }
             } else if method_name == "push" {
                 // push method requires an argument
@@ -501,10 +532,18 @@ impl Parser {
                 let arg = self.expression()?;
                 self.consume(&Token::RightParen, "Expect ')' after push argument")?;
                 arg
-            } else if method_name == "pop" || method_name == "length" || method_name == "clear" || 
-                      method_name == "reverse" || method_name == "toUpper" || method_name == "toLower" || 
-                      method_name == "trim" || method_name == "getYear" || method_name == "getMonth" || 
-                      method_name == "getDay" || method_name == "keys" {
+            } else if method_name == "pop"
+                || method_name == "length"
+                || method_name == "clear"
+                || method_name == "reverse"
+                || method_name == "toUpper"
+                || method_name == "toLower"
+                || method_name == "trim"
+                || method_name == "getYear"
+                || method_name == "getMonth"
+                || method_name == "getDay"
+                || method_name == "keys"
+            {
                 // These methods don't take arguments
                 self.consume(&Token::LeftParen, "Expect '(' after method name")?;
                 self.consume(&Token::RightParen, "Expect ')' after method name")?;
@@ -538,26 +577,26 @@ impl Parser {
             } else {
                 return Err(format!("Unsupported method: {method_name}"));
             };
-            
+
             expr = Expr::MethodCall {
                 object: Box::new(expr),
                 method: method_name,
                 argument: Box::new(argument),
             };
         }
-        
+
         // Check for array indexing
         while self.check(&Token::LeftBracket) {
             self.advance(); // consume '['
             let index = self.expression()?; // Parse the index expression
             self.consume(&Token::RightBracket, "Expect ']' after array index.")?;
-            
+
             expr = Expr::Index {
                 array: Box::new(expr),
                 index: Box::new(index),
             };
         }
-        
+
         Ok(expr)
     }
 
@@ -631,7 +670,11 @@ impl Parser {
         if self.check(token_type) {
             Ok(self.advance()) // Return the token
         } else {
-            Err(format!("{message} at line {line} column {column}", line = self.peek().line, column = self.peek().column)) // Error if not matched
+            Err(format!(
+                "{message} at line {line} column {column}",
+                line = self.peek().line,
+                column = self.peek().column
+            )) // Error if not matched
         }
     }
 
@@ -640,7 +683,11 @@ impl Parser {
         let token = self.advance(); // Get the next token
         match &token.token {
             Token::Identifier(_) => Ok(token), // Return if it's an identifier
-            _ => Err(format!("{message} at line {line} column {column}", line = token.line, column = token.column)), // Error otherwise
+            _ => Err(format!(
+                "{message} at line {line} column {column}",
+                line = token.line,
+                column = token.column
+            )), // Error otherwise
         }
     }
 }

@@ -1,25 +1,25 @@
 // Import the token module
 mod token; // Handles token definitions and tokenization
-// Import the lexer module
+           // Import the lexer module
 mod lexer; // Handles lexical analysis (tokenizing source code)
-// Import the ast module
+           // Import the ast module
 mod ast; // Defines the abstract syntax tree (AST) structures
-// Import the parser module
+         // Import the parser module
 mod parser; // Handles parsing tokens into AST
-// Import the interpreter module
+            // Import the interpreter module
 mod interpreter; // Handles interpreting/executing the AST
 
+use crate::interpreter::Interpreter;
 use std::env; // Import for reading command-line arguments
 use std::fs; // Import for file system operations
-use std::io::{self, Write}; // Import for input/output
-use crate::interpreter::Interpreter; // Import the Interpreter struct
+use std::io::{self, Write}; // Import for input/output // Import the Interpreter struct
 
 // The main entry point of the program
 fn main() {
     let args: Vec<String> = env::args().collect(); // Collect command-line arguments
     if args.len() > 1 {
         let first_arg = &args[1]; // Get the first argument
-        
+
         // Check for standalone flags first
         match first_arg.as_str() {
             "--help" | "-h" => {
@@ -32,10 +32,10 @@ fn main() {
             }
             _ => {}
         }
-        
+
         // If not a standalone flag, treat as file path
         let path = first_arg;
-        
+
         // Check file extension (for all file operations)
         if !path.ends_with(".pg") {
             let dot_index = path.rfind('.').unwrap_or(path.len());
@@ -62,12 +62,12 @@ fn main() {
                     display_version();
                     return;
                 }
-                                    _ => {
-                        eprintln!("Unknown flag: {flag}", flag = args[2]);
-                        eprintln!("Available flags: --tokens, --ast, --help, --version");
-                        eprintln!("Usage: pidgin-compiler <file.pg> [--tokens|--ast|--help|--version]");
-                        std::process::exit(1);
-                    }
+                _ => {
+                    eprintln!("Unknown flag: {flag}", flag = args[2]);
+                    eprintln!("Available flags: --tokens, --ast, --help, --version");
+                    eprintln!("Usage: pidgin-compiler <file.pg> [--tokens|--ast|--help|--version]");
+                    std::process::exit(1);
+                }
             }
         }
 
@@ -104,7 +104,7 @@ fn run_prompt() {
                 if input.is_empty() {
                     continue; // Skip empty lines
                 }
-                
+
                 match input {
                     "exit" | "quit" => {
                         println!("Goodbye!");
@@ -168,7 +168,8 @@ fn print_help() {
 // Run source code (used for files)
 fn run(source: &str) {
     let mut interpreter = Interpreter::new(None); // Create a new interpreter
-    if let Err(e) = run_with_interpreter(source, &mut interpreter) { // Run the code
+    if let Err(e) = run_with_interpreter(source, &mut interpreter) {
+        // Run the code
         eprintln!("Error: {e}"); // Print error if any
     }
 }
@@ -206,7 +207,16 @@ fn display_ast(path: &str) {
 
 // Display the version of the compiler
 fn display_version() {
-    println!("Pidgin Compiler v{version}", version = env!("CARGO_PKG_VERSION"));
-    println!("Platform: {platform}", platform = std::env::var("TARGET").unwrap_or_default());
-    println!("Build Date: {build_date}", build_date = std::env::var("VERGEN_BUILD_TIMESTAMP").unwrap_or_default());
+    println!(
+        "Pidgin Compiler v{version}",
+        version = env!("CARGO_PKG_VERSION")
+    );
+    println!(
+        "Platform: {platform}",
+        platform = std::env::var("TARGET").unwrap_or_default()
+    );
+    println!(
+        "Build Date: {build_date}",
+        build_date = std::env::var("VERGEN_BUILD_TIMESTAMP").unwrap_or_default()
+    );
 }
