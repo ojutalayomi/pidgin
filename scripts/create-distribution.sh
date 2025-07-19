@@ -16,14 +16,62 @@ fi
 
 echo "Creating distribution for $PLATFORM on $OS..."
 
+# Debug: Show current directory and target structure
+echo "=== Debug Information ==="
+echo "Current directory: $(pwd)"
+echo "Target directory exists: $(test -d target && echo "YES" || echo "NO")"
+if [ -d target ]; then
+    echo "Target contents:"
+    find target -name "pidgin-compiler*" -type f 2>/dev/null || echo "No pidgin-compiler files found"
+    echo "Release directory exists: $(test -d target/release && echo "YES" || echo "NO")"
+    if [ -d target/release ]; then
+        echo "Release directory contents:"
+        ls -la target/release/
+    fi
+fi
+echo "========================"
+
 # Create distribution directory
 mkdir -p "pidgin-compiler-$PLATFORM"
 
 # Copy executable
 if [ "$OS" = "windows-latest" ]; then
-    cp target/x86_64-pc-windows-msvc/release/pidgin-compiler.exe "pidgin-compiler-$PLATFORM/"
+    # For Windows, look for the specific target
+    if [ -f "target/x86_64-pc-windows-msvc/release/pidgin-compiler.exe" ]; then
+        echo "Found executable at target/x86_64-pc-windows-msvc/release/pidgin-compiler.exe"
+        cp target/x86_64-pc-windows-msvc/release/pidgin-compiler.exe "pidgin-compiler-$PLATFORM/"
+    else
+        echo "Error: Windows executable not found at target/x86_64-pc-windows-msvc/release/pidgin-compiler.exe"
+        exit 1
+    fi
 else
-    cp target/*/release/pidgin-compiler "pidgin-compiler-$PLATFORM/"
+    # For Unix-like systems, try to find the executable
+    if [ -f "target/release/pidgin-compiler" ]; then
+        echo "Found executable at target/release/pidgin-compiler"
+        cp target/release/pidgin-compiler "pidgin-compiler-$PLATFORM/"
+    elif [ -f "target/x86_64-unknown-linux-gnu/release/pidgin-compiler" ]; then
+        echo "Found executable at target/x86_64-unknown-linux-gnu/release/pidgin-compiler"
+        cp target/x86_64-unknown-linux-gnu/release/pidgin-compiler "pidgin-compiler-$PLATFORM/"
+    elif [ -f "target/aarch64-unknown-linux-gnu/release/pidgin-compiler" ]; then
+        echo "Found executable at target/aarch64-unknown-linux-gnu/release/pidgin-compiler"
+        cp target/aarch64-unknown-linux-gnu/release/pidgin-compiler "pidgin-compiler-$PLATFORM/"
+    elif [ -f "target/x86_64-apple-darwin/release/pidgin-compiler" ]; then
+        echo "Found executable at target/x86_64-apple-darwin/release/pidgin-compiler"
+        cp target/x86_64-apple-darwin/release/pidgin-compiler "pidgin-compiler-$PLATFORM/"
+    elif [ -f "target/aarch64-apple-darwin/release/pidgin-compiler" ]; then
+        echo "Found executable at target/aarch64-apple-darwin/release/pidgin-compiler"
+        cp target/aarch64-apple-darwin/release/pidgin-compiler "pidgin-compiler-$PLATFORM/"
+    else
+        echo "Error: Executable not found. Available targets:"
+        find target -name "pidgin-compiler*" -type f 2>/dev/null || echo "No targets found"
+        echo "Tried paths:"
+        echo "  - target/release/pidgin-compiler"
+        echo "  - target/x86_64-unknown-linux-gnu/release/pidgin-compiler"
+        echo "  - target/aarch64-unknown-linux-gnu/release/pidgin-compiler"
+        echo "  - target/x86_64-apple-darwin/release/pidgin-compiler"
+        echo "  - target/aarch64-apple-darwin/release/pidgin-compiler"
+        exit 1
+    fi
 fi
 
 # Copy examples

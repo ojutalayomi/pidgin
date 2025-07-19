@@ -21,7 +21,7 @@ jobs:
           override: true
 
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
@@ -42,6 +42,9 @@ jobs:
           cargo run examples/hello.pg
           cargo run examples/simple.pg
           cargo run examples/fibonacci.pg
+
+      - name: Build release for testing
+        run: cargo build --release
 
       - name: Test distribution script
         run: |
