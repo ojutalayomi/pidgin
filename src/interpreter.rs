@@ -30,9 +30,9 @@ pub enum Value {
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Value::Number(n) => write!(f, "{}", n), // Convert number to string
-            Value::String(s) => write!(f, "{}", s), // Clone string
-            Value::Boolean(b) => write!(f, "{}", b), // Convert bool to string
+            Value::Number(n) => write!(f, "{n}"), // Convert number to string
+            Value::String(s) => write!(f, "{s}"), // Clone string
+            Value::Boolean(b) => write!(f, "{b}"), // Convert bool to string
             Value::Nil => write!(f, "nil"), // Nil as "nil"
             Value::Function(params, _body) => {
                 let params_str = params.join(", ");
@@ -49,7 +49,7 @@ impl fmt::Display for Value {
             Value::Object(obj) => {
                 let mut pairs = Vec::new();
                 for (key, value) in obj {
-                    pairs.push(format!("{key}: {}", value));
+                    pairs.push(format!("{key}: {value}"));
                 }
                 write!(f, "{{ {} }}", pairs.join(", "))
             }
@@ -139,7 +139,7 @@ impl Interpreter {
                 
                 if arguments.is_empty() {
                     // Simple print: print value;
-                    println!("{}", format_value);
+                    println!("{format_value}");
                 } else {
                     // Format string print: print "{}", value;
                     let format_str = match format_value {
@@ -171,7 +171,7 @@ impl Interpreter {
                     }
                     // If there are extra arguments, ignore them
                 
-                    println!("{}", formatted); // Print the value
+                    println!("{formatted}"); // Print the value
                 }
                 Ok(ControlFlow::None)
             }
@@ -743,7 +743,7 @@ impl Interpreter {
         let full_path = if module_path.ends_with(".pg") {
             module_path.to_string()
         } else {
-            format!("{}.pg", module_path)
+            format!("{module_path}.pg")
         };
         
         // Try to find the module file
@@ -751,7 +751,7 @@ impl Interpreter {
             full_path.clone()
         } else {
             // Try in examples directory
-            let examples_path = format!("examples/{}", full_path);
+            let examples_path = format!("examples/{full_path}");
             if Path::new(&examples_path).exists() {
                 examples_path
             } else {
@@ -832,7 +832,7 @@ impl Interpreter {
         }
         
         let value = self.evaluate_expr(&arguments[0])?;
-        eprintln!("{}", value);
+        eprintln!("{value}");
         Ok(Value::Nil)
     }
     

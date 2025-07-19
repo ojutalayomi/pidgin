@@ -40,7 +40,7 @@ fn main() {
         if !path.ends_with(".pg") {
             let dot_index = path.rfind('.').unwrap_or(path.len());
             let ext = &path[dot_index..];
-            panic!("Expected .pg file but got {} from {}", ext, path);
+            panic!("Expected .pg file but got {ext} from {path}");
         }
 
         // Check for file-specific flags
@@ -63,7 +63,7 @@ fn main() {
                     return;
                 }
                                     _ => {
-                        eprintln!("Unknown flag: {}", args[2]);
+                        eprintln!("Unknown flag: {flag}", flag = args[2]);
                         eprintln!("Available flags: --tokens, --ast, --help, --version");
                         eprintln!("Usage: pidgin-compiler <file.pg> [--tokens|--ast|--help|--version]");
                         std::process::exit(1);
@@ -122,13 +122,13 @@ fn run_prompt() {
                     }
                     _ => {
                         if let Err(e) = run_with_interpreter(&buffer, &mut interpreter) {
-                            eprintln!("Error: {}", e);
+                            eprintln!("Error: {e}");
                         }
                     }
                 }
             }
             Err(e) => {
-                eprintln!("Error reading input: {}", e);
+                eprintln!("Error reading input: {e}");
                 break;
             }
         }
@@ -169,7 +169,7 @@ fn print_help() {
 fn run(source: &str) {
     let mut interpreter = Interpreter::new(None); // Create a new interpreter
     if let Err(e) = run_with_interpreter(source, &mut interpreter) { // Run the code
-        eprintln!("Error: {}", e); // Print error if any
+        eprintln!("Error: {e}"); // Print error if any
     }
 }
 
@@ -188,7 +188,7 @@ fn display_tokens(path: &str) {
     let mut lexer = lexer::Lexer::new(&source); // Create a lexer
     let tokens = lexer.tokenize(); // Tokenize the source code
     for token in tokens {
-        println!("{:?}", token); // Print each token
+        println!("{token:?}"); // Print each token
     }
 }
 
@@ -199,14 +199,14 @@ fn display_ast(path: &str) {
     let tokens = lexer.tokenize(); // Tokenize the source code
     let mut parser = parser::Parser::new(tokens); // Create a parser
     match parser.parse() {
-        Ok(program) => println!("{:?}", program), // Print AST if parsing succeeds
-        Err(e) => eprintln!("Parse error: {}", e), // Print error if parsing fails
+        Ok(program) => println!("{program:?}"), // Print AST if parsing succeeds
+        Err(e) => eprintln!("Parse error: {e}"), // Print error if parsing fails
     }
 }
 
 // Display the version of the compiler
 fn display_version() {
-    println!("Pidgin Compiler v{}", env!("CARGO_PKG_VERSION"));
-    println!("Platform: {}", std::env::var("TARGET").unwrap_or_default());
-    println!("Build Date: {}", std::env::var("VERGEN_BUILD_TIMESTAMP").unwrap_or_default());
+    println!("Pidgin Compiler v{version}", version = env!("CARGO_PKG_VERSION"));
+    println!("Platform: {platform}", platform = std::env::var("TARGET").unwrap_or_default());
+    println!("Build Date: {build_date}", build_date = std::env::var("VERGEN_BUILD_TIMESTAMP").unwrap_or_default());
 }

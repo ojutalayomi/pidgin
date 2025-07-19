@@ -87,7 +87,7 @@ impl Lexer {
                         self.advance();
                         tokens.push(TokenInfo::new(Token::NotEqual, line, column)); // Add a NotEqual token (!=)
                     } else {
-                        panic!("Unexpected character '!' at line {}, column {}", line, column); // Error for lone '!'
+                        panic!("Unexpected character '!' at line {line}, column {column}"); // Error for lone '!'
                     }
                 }
                 '<' => {
