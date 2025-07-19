@@ -1,6 +1,7 @@
 [package]
 name = "pidgin-compiler"
 version = "0.1.16"
+rust-version = "1.70"
 
 edition = "2021"
 
