@@ -14,8 +14,8 @@ pidgin-compiler examples/hello.pg
 pidgin-compiler
 
 # Show debug information
-pidgin-compiler --tokens examples/hello.pg
-pidgin-compiler --ast examples/hello.pg
+pidgin-compiler examples/hello.pg --tokens
+pidgin-compiler examples/hello.pg --ast
 ```
 
 ### Install System-Wide

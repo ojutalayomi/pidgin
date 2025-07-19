@@ -62,11 +62,12 @@ fn main() {
                     display_version();
                     return;
                 }
-                _ => {
-                    eprintln!("Unknown flag: {}", args[2]);
-                    eprintln!("Available flags: --tokens, --ast, --help, --version");
-                    std::process::exit(1);
-                }
+                                    _ => {
+                        eprintln!("Unknown flag: {}", args[2]);
+                        eprintln!("Available flags: --tokens, --ast, --help, --version");
+                        eprintln!("Usage: pidgin-compiler <file.pg> [--tokens|--ast|--help|--version]");
+                        std::process::exit(1);
+                    }
             }
         }
 
@@ -136,6 +137,14 @@ fn run_prompt() {
 
 // Print help information for the REPL
 fn print_help() {
+    println!("Pidgin Compiler Usage:");
+    println!("  pidgin-compiler <file.pg>              - Run a Pidgin program");
+    println!("  pidgin-compiler <file.pg> --tokens     - Show tokens for a file");
+    println!("  pidgin-compiler <file.pg> --ast        - Show AST for a file");
+    println!("  pidgin-compiler <file.pg> --help       - Show this help message");
+    println!("  pidgin-compiler <file.pg> --version    - Show version information");
+    println!("  pidgin-compiler                         - Start interactive REPL");
+    println!();
     println!("Pidgin REPL Commands:");
     println!("  exit, quit    - Exit the REPL");
     println!("  help          - Show this help message");

@@ -8,3 +8,5 @@ pidgin-compiler-dist/README.md
 pidgin-compiler-dist/LICENSE
 pidgin-compiler-dist/pidgin-compiler
 pidgin-compiler-dist/pidgin-compiler.exe
+pidgin-compiler-macos-x86_64
+pidgin-compiler-macos-x86_64/pidgin-compiler

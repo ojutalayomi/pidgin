@@ -1,5 +1,0 @@
-let greeting = "Hello, Pidgin!";
-print greeting;
-let x = 5;
-let y = 10;
-print x + y;

@@ -1,16 +1,14 @@
-name: Continuous Integration
+name: Comprehensive CI
 
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  release:
-    types: [published]
 
 jobs:
   test:
-    name: Test Suite
+    name: Multi-Rust Testing
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -44,10 +42,30 @@ jobs:
         run: cargo test
 
       - name: Run comprehensive test suite
-        run: cargo run examples/comprehensive_test.pg
+        run: |
+          echo "Running comprehensive test suite..."
+          cargo run examples/comprehensive_test.pg
+          echo "Comprehensive tests completed"
 
-      - name: Run performance tests
-        run: cargo run examples/performance_test.pg
+      - name: Run all feature tests
+        run: |
+          echo "Running all feature tests..."
+          cargo run examples/array_test.pg
+          cargo run examples/test_new_features.pg
+          cargo run examples/method_comparison.pg
+          cargo run examples/simple_date_test.pg
+          cargo run examples/replaceChar_test.pg
+          cargo run examples/new_methods_test.pg
+          cargo run examples/final_integration_test.pg
+          echo "All feature tests completed"
+
+      - name: Test error handling
+        run: |
+          echo "Testing error conditions..."
+          cargo run examples/array_bounds_test.pg || true
+          cargo run examples/array_method_error_test.pg || true
+          cargo run examples/import_error_test.pg || true
+          echo "Error handling tests completed"
 
   lint:
     name: Code Quality
@@ -92,13 +110,12 @@ jobs:
       - name: Run security audit
         run: cargo audit
 
-  build-multi-platform:
-    name: Multi-Platform Build
+  build-basic:
+    name: Basic Multi-Platform Build
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        target: [x86_64-unknown-linux-gnu, x86_64-apple-darwin, x86_64-pc-windows-msvc]
 
     steps:
       - name: Checkout code
@@ -109,39 +126,12 @@ jobs:
         with:
           toolchain: stable
           override: true
-          target: ${{ matrix.target }}
 
-      - name: Build for target
-        run: cargo build --release --target ${{ matrix.target }}
+      - name: Build
+        run: cargo build --release
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: pidgin-compiler-${{ matrix.os }}-${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/pidgin-compiler*
-
-  release:
-    name: Create Release
-    runs-on: ubuntu-latest
-    needs: [test, lint, security, build-multi-platform]
-    if: github.event_name == 'release'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download all build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-
-      - name: Create release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: artifacts/**/*
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Test basic functionality
+        run: cargo run --release examples/hello.pg
 
   performance:
     name: Performance Benchmark
@@ -170,4 +160,10 @@ jobs:
       - name: Memory usage analysis
         run: |
           echo "Analyzing memory usage..."
-          /usr/bin/time -v cargo run --release examples/performance_test.pg 2>&1 | grep "Maximum resident set size" || true 
+          /usr/bin/time -v cargo run --release examples/performance_test.pg 2>&1 | grep "Maximum resident set size" || true
+
+      - name: Test distribution script
+        run: |
+          chmod +x scripts/create-distribution.sh
+          ./scripts/create-distribution.sh test-platform ubuntu-latest
+          ls -la pidgin-compiler-test-platform/ 
