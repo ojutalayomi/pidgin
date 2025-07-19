@@ -1,0 +1,9 @@
+// Debug method calls step by step
+let birthday = Date(2024, 1, 1);
+print "Birthday created: {}", birthday;
+
+// Try a method call that should work (array method)
+let arr = {1, 2};
+print "Array: {}", arr;
+let len = arr.length();
+print "Length works: {}", len;

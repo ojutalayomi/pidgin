@@ -1,0 +1,6 @@
+// Test format method specifically
+let birthday = Date(2024, 1, 1);
+print "Birthday: {}", birthday;
+
+// This line causes the error:
+let formatted = birthday.format("%Y-%m-%d");

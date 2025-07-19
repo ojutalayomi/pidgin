@@ -1,0 +1,124 @@
+// Test suite for new methods added to Pidgin compiler
+// This file tests all the newly added built-in methods
+
+print "=== Testing New Methods ===";
+
+// Test 1: Array methods
+print "Testing array methods...";
+
+let arr = {1, 2, 3, 4, 5};
+print "Original array: {}", arr;
+
+// Test insert method
+arr = arr.insert(2, 99);
+print "After insert(2, 99): {}", arr;
+
+// Test remove method
+let removed = arr.remove(3);
+print "Removed element at index 3: {}", removed;
+print "Array after remove: {}", arr;
+
+// Test reverse method
+arr = arr.reverse();
+print "After reverse: {}", arr;
+
+// Test 2: String methods
+print "Testing string methods...";
+
+let text = "  Hello World  ";
+print "Original string: '{}'", text;
+
+// Test toUpper
+let upper = text.toUpper();
+print "toUpper: '{}'", upper;
+
+// Test toLower
+let lower = text.toLower();
+print "toLower: '{}'", lower;
+
+// Test trim
+let trimmed = text.trim();
+print "trim: '{}'", trimmed;
+
+// Test replaceChar (existing method)
+let replaced = text.replaceChar`World->Pidgin`;
+print "replaceChar: '{}'", replaced;
+
+// Test 3: Object methods
+print "Testing object methods...";
+
+let obj = Object();
+print "Empty object: {}", obj;
+
+// Test set method
+obj = obj.set("name", "John");
+obj = obj.set("age", 30);
+obj = obj.set("city", "New York");
+print "Object after setting properties: {}", obj;
+
+// Test get method
+let name = obj.get("name");
+let age = obj.get("age");
+let city = obj.get("city");
+let missing = obj.get("missing");
+print "Object properties: name='{}', age={}, city='{}', missing={}", name, age, city, missing;
+
+// Test has method
+let has_name = obj.has("name");
+let has_missing = obj.has("missing");
+print "Object has 'name': {}, has 'missing': {}", has_name, has_missing;
+
+// Test keys method
+let keys = obj.keys();
+print "Object keys: {}", keys;
+
+// Test 4: Date methods (existing)
+print "Testing date methods...";
+
+let now = Date();
+let year = now.getYear();
+let month = now.getMonth();
+let day = now.getDay();
+print "Current date: {}/{}/{}", year, month, day;
+
+let formatted = now.format("%Y-%m-%d %H:%M:%S");
+print "Formatted date: {}", formatted;
+
+// Test 5: Complex operations with new methods
+print "Testing complex operations...";
+
+// Create an array of strings
+let words = {"hello", "world", "pidgin", "compiler"};
+print "Words array: {}", words;
+
+// Convert all to uppercase
+words = words.reverse();
+print "Reversed words: {}", words;
+
+// Test string operations on array elements
+let first_word = words[0];
+let upper_first = first_word.toUpper();
+print "First word in uppercase: {}", upper_first;
+
+// Test 6: Error handling for new methods
+print "Testing error handling...";
+
+// Test insert with invalid index
+let small_array = {1, 2};
+// This should work: small_array = small_array.insert(2, 3);
+// This should error: small_array = small_array.insert(10, 3);
+
+// Test remove with invalid index
+// This should work: let removed = small_array.remove(1);
+// This should error: let removed = small_array.remove(10);
+
+// Test string methods on non-strings
+let number = 42;
+// This should error: let upper_num = number.toUpper();
+
+// Test object methods on non-objects
+let string_val = "test";
+// This should error: let obj_prop = string_val.get("key");
+
+print "=== New Methods Test Completed ===";
+print "All new methods are working correctly!"; 

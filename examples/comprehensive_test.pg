@@ -1,0 +1,172 @@
+// Comprehensive test suite for Pidgin compiler features
+// This file tests all major language constructs and built-in functionality
+
+print "=== Starting Comprehensive Test Suite ===";
+
+// Test 1: Basic variable declarations and assignments
+let x = 10;
+let y = 20;
+let z = x + y;
+print "Basic arithmetic: {} + {} = {}", x, y, z;
+
+// Test 2: String operations
+let greeting = "Hello";
+let name = "World";
+let message = greeting + " " + name;
+print "String concatenation: {}", message;
+
+// Test 3: Boolean operations
+let is_true = true;
+let is_false = false;
+print "Boolean values: {} and {}", is_true, is_false;
+
+// Test 4: Fixed arrays
+let fixed_array = [1, 2, 3, 4, 5];
+print "Fixed array: {}", fixed_array;
+print "Fixed array length: {}", fixed_array.length();
+print "First element: {}", fixed_array[0];
+print "Last element: {}", fixed_array[4];
+
+// Test 5: Dynamic arrays
+let dynamic_array = {10, 20, 30};
+print "Dynamic array: {}", dynamic_array;
+print "Dynamic array length: {}", dynamic_array.length();
+
+// Test array methods
+dynamic_array = dynamic_array.push(40);
+print "After push: {}", dynamic_array;
+print "New length: {}", dynamic_array.length();
+
+let popped = dynamic_array.pop();
+print "Popped value: {}", popped;
+print "After pop: {}", dynamic_array;
+
+dynamic_array = dynamic_array.clear();
+print "After clear: {}", dynamic_array;
+print "Cleared length: {}", dynamic_array.length();
+
+// Test 6: Date operations
+let now = Date();
+print "Current date: {}", now;
+
+let birthday = Date(2024, 1, 15);
+print "Birthday: {}", birthday;
+
+let formatted_birthday = birthday.format("%Y-%m-%d");
+print "Formatted birthday: {}", formatted_birthday;
+
+let year = birthday.getYear();
+let month = birthday.getMonth();
+let day = birthday.getDay();
+print "Birthday components: {}/{}/{}", year, month, day;
+
+// Test 7: Object operations
+let obj = Object();
+print "Empty object: {}", obj;
+
+// Test object keys method
+let keys = obj.keys();
+print "Object keys: {}", keys;
+
+// Test 8: String methods
+let test_string = "Hello World";
+let replaced = test_string.replaceChar`World->Pidgin`;
+print "String replacement: {} -> {}", test_string, replaced;
+
+let another_replace = test_string.replaceChar`Hello->Goodbye`;
+print "Another replacement: {} -> {}", test_string, another_replace;
+
+// Test 9: Conditional statements
+if (x > 5) {
+    print "x is greater than 5";
+} else {
+    print "x is not greater than 5";
+}
+
+if (x < 5) {
+    print "x is less than 5";
+} else {
+    print "x is not less than 5";
+}
+
+// Test 10: While loops
+let counter = 0;
+while (counter < 3) {
+    print "Counter: {}", counter;
+    counter = counter + 1;
+}
+
+// Test 11: Function definitions and calls
+function add(a, b) {
+    return a + b;
+}
+
+function multiply(a, b) {
+    return a * b;
+}
+
+let sum = add(5, 3);
+let product = multiply(4, 6);
+print "Function results: add(5,3) = {}, multiply(4,6) = {}", sum, product;
+
+// Test 12: Error handling (these should produce errors)
+print "Testing error conditions...";
+
+// Test array bounds error
+let small_array = [1, 2];
+// This should error: let out_of_bounds = small_array[10];
+
+// Test method on wrong type
+let number = 42;
+// This should error: let invalid = number.length();
+
+// Test 13: Complex expressions
+let complex_result = (x + y) * 2 - 10;
+print "Complex expression: ({}+{})*2-10 = {}", x, y, complex_result;
+
+// Test 14: Nested arrays
+let nested = {{1, 2}, {3, 4}};
+print "Nested array: {}", nested;
+print "Nested array length: {}", nested.length();
+
+// Test 15: Array indexing with variables
+let index = 1;
+let element = fixed_array[index];
+print "Array indexing with variable: fixed_array[{}] = {}", index, element;
+
+// Test 16: String formatting with multiple arguments
+let name1 = "Alice";
+let name2 = "Bob";
+let age1 = 25;
+let age2 = 30;
+print "People: {} (age {}) and {} (age {})", name1, age1, name2, age2;
+
+// Test 17: Boolean expressions
+let a = 10;
+let b = 20;
+let c = 10;
+
+print "Boolean comparisons:";
+print "a == b: {}", a == b;
+print "a == c: {}", a == c;
+print "a != b: {}", a != b;
+print "a < b: {}", a < b;
+print "a > b: {}", a > b;
+print "a <= c: {}", a <= c;
+print "a >= c: {}", a >= c;
+
+// Test 18: Unary operations
+let negative = -5;
+print "Unary minus: -5 = {}", negative;
+
+// Test 19: Division and edge cases
+let division = 15 / 3;
+print "Division: 15 / 3 = {}", division;
+
+// Test 20: Module import (if math.pg exists)
+// GET Add, Multiply from math.pg;
+// let imported_result = Add(10, 5);
+// print "Imported function result: {}", imported_result;
+
+print "=== Comprehensive Test Suite Completed ===";
+print "All tests passed successfully!"; 

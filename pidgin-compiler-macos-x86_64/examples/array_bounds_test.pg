@@ -1,0 +1,9 @@
+// Test array bounds checking
+let arr = [1, 2, 3];
+print "Array: {}", arr;
+print "Length: {}", arr.length();
+
+// This should cause an error
+print "Trying to access arr[5]...";
+let value = arr[5];
+print "This should not print: {}", value; 

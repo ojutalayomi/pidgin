@@ -1,6 +1,8 @@
 use crate::token::{TokenInfo}; // Import necessary types from the Token module
 use crate::ast::{Expr, Stmt, Program, BinaryOp, UnaryOp}; // Import AST types
 use std::collections::HashMap; // Import HashMap for variable storage
+use std::io::{self, Write};
+use chrono::{DateTime, Local, Datelike};
 
 // Define a custom result type for handling returns
 #[derive(Debug, Clone)]
@@ -17,6 +19,8 @@ pub enum Value {
     Boolean(bool), // Boolean value
     FixedArray(Vec<Value>),
     DynamicArray(Vec<Value>),
+    Object(HashMap<String, Value>), // Object with key-value pairs
+    Date(DateTime<Local>), // Date/time value
     Nil, // Nil (no value)
     Function(Vec<String>, Box<Stmt>), // Function value
 }
@@ -51,6 +55,34 @@ impl Value {
                 let elements = arr.iter().map(|v| v.to_string()).collect::<Vec<String>>().join(", ");
                 format!("{{{}}}", elements)
             }
+            Value::Object(obj) => {
+                let mut pairs = Vec::new();
+                for (key, value) in obj {
+                    pairs.push(format!("{}: {}", key, value.to_string()));
+                }
+                format!("{{ {} }}", pairs.join(", "))
+            }
+            Value::Date(dt) => {
+                dt.format("%Y-%m-%d %H:%M:%S").to_string()
+            }
+        }
+    }
+    
+    // Optimized equality check
+    fn is_equal(&self, other: &Value) -> bool {
+        match (self, other) {
+            (Value::Number(a), Value::Number(b)) => a == b,
+            (Value::String(a), Value::String(b)) => a == b,
+            (Value::Boolean(a), Value::Boolean(b)) => a == b,
+            (Value::Nil, Value::Nil) => true,
+            (Value::FixedArray(a), Value::FixedArray(b)) | 
+            (Value::DynamicArray(a), Value::DynamicArray(b)) => {
+                if a.len() != b.len() {
+                    return false;
+                }
+                a.iter().zip(b.iter()).all(|(x, y)| x.is_equal(y))
+            }
+            _ => false,
         }
     }
 }
@@ -281,8 +313,8 @@ impl Interpreter {
                             Err(format!("Invalid operands for division: {:?} / {:?} at line {} column {}", left_val, right_val, line, column))
                         }
                     },
-                    BinaryOp::Equal => Ok(Value::Boolean(self.is_equal(&left_val, &right_val))), // Equality check
-                    BinaryOp::NotEqual => Ok(Value::Boolean(!self.is_equal(&left_val, &right_val))), // Not-equal check
+                    BinaryOp::Equal => Ok(Value::Boolean(left_val.is_equal(right_val))), // Equality check
+                    BinaryOp::NotEqual => Ok(Value::Boolean(!left_val.is_equal(right_val))), // Not-equal check
                     BinaryOp::Greater => match (left_val, right_val) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Boolean(a > b)), // Greater than
                         _ => {
@@ -325,104 +357,310 @@ impl Interpreter {
                 Ok(val) // Return the value
             }
             Expr::MethodCall { object, method, argument } => {
-                if method == "replaceChar" {
-                    let object_val = self.evaluate_expr(object)?;
-                    if let Value::String(original) = object_val {
-                        if let Expr::Transform { from, to } = argument.as_ref() {
-                            // Try to resolve 'from' as a variable, fallback to literal if not found
-                            let from_value = if let Some(val) = self.globals.get(from) {
-                                match val {
-                                    Value::String(s) => s.clone(),
-                                    Value::Number(n) => n.to_string(),
-                                    Value::Boolean(b) => b.to_string(),
-                                    _ => return Err(format!("Variable '{}' is not a valid replacement value", from)),
-                                }
+                // Evaluate object once at the beginning
+                let object_val = self.evaluate_expr(object)?;
+                
+                // Remove debug print in production
+                // eprintln!("DEBUG: Method '{}' called on object type: {:?}", method, std::mem::discriminant(&object_val));
+                
+                match method.as_str() {
+                    "replaceChar" => {
+                        if let Value::String(original) = &object_val {
+                            if let Expr::Transform { from, to } = argument.as_ref() {
+                                // Try to resolve 'from' as a variable, fallback to literal if not found
+                                let from_value = if let Some(val) = self.globals.get(from) {
+                                    match val {
+                                        Value::String(s) => s.clone(),
+                                        Value::Number(n) => n.to_string(),
+                                        Value::Boolean(b) => b.to_string(),
+                                        _ => return Err(format!("Variable '{}' is not a valid replacement value", from)),
+                                    }
+                                } else {
+                                    from.clone() // Use as literal if not a variable
+                                };
+                                // Try to resolve 'to' as a variable, fallback to literal if not found
+                                let to_value = if let Some(val) = self.globals.get(to) {
+                                    match val {
+                                        Value::String(s) => s.clone(),
+                                        Value::Number(n) => n.to_string(),
+                                        Value::Boolean(b) => b.to_string(),
+                                        _ => return Err(format!("Variable '{}' is not a valid replacement value", to)),
+                                    }
+                                } else {
+                                    to.clone() // Use as literal if not a variable
+                                };
+                                let result = original.replace(&from_value, &to_value);
+                                Ok(Value::String(result))
                             } else {
-                                from.clone() // Use as literal if not a variable
-                            };
-                            // Try to resolve 'to' as a variable, fallback to literal if not found
-                            let to_value = if let Some(val) = self.globals.get(to) {
-                                match val {
-                                    Value::String(s) => s.clone(),
-                                    Value::Number(n) => n.to_string(),
-                                    Value::Boolean(b) => b.to_string(),
-                                    _ => return Err(format!("Variable '{}' is not a valid replacement value", to)),
-                                }
-                            } else {
-                                to.clone() // Use as literal if not a variable
-                            };
-                            let result = original.replace(&from_value, &to_value);
-                            Ok(Value::String(result))
+                                Err("ReplaceChar method requires a transform argument".to_string())
+                            }
                         } else {
-                            Err("ReplaceChar method requires a transform argument".to_string())
+                            Err("ReplaceChar method can only be called on strings".to_string())
                         }
-                    } else {
-                        Err("ReplaceChar method can only be called on strings".to_string())
-                    }
-                } else if method == "push" {
-                    // Array push method: arr.push(value)
-                    let object_val = self.evaluate_expr(object)?;
-                    let arg_val = self.evaluate_expr(argument)?;
-                    
-                    match object_val {
-                        Value::DynamicArray(mut arr) => {
+                    },
+                    "push" => {
+                        // Array push method: arr.push(value)
+                        let arg_val = self.evaluate_expr(argument)?;
+                        
+                        if let Value::DynamicArray(mut arr) = object_val {
                             arr.push(arg_val);
                             Ok(Value::DynamicArray(arr))
+                        } else {
+                            Err("Push method can only be called on dynamic arrays".to_string())
                         }
-                        _ => Err("Push method can only be called on dynamic arrays".to_string()),
-                    }
-                } else if method == "pop" {
-                    // Array pop method: arr.pop()
-                    let object_val = self.evaluate_expr(object)?;
-                    
-                    // Verify no argument was provided
-                    if let Expr::Nil = argument.as_ref() {
-                        match object_val {
-                            Value::DynamicArray(mut arr) => {
+                    },
+                    "pop" => {
+                        // Array pop method: arr.pop()
+                        // Verify no argument was provided
+                        if let Expr::Nil = argument.as_ref() {
+                            if let Value::DynamicArray(mut arr) = object_val {
                                 if arr.is_empty() {
                                     Err("Cannot pop from empty array".to_string())
                                 } else {
                                     let popped = arr.pop().unwrap();
                                     Ok(popped)
                                 }
+                            } else {
+                                Err("Pop method can only be called on dynamic arrays".to_string())
                             }
-                            _ => Err("Pop method can only be called on dynamic arrays".to_string()),
+                        } else {
+                            Err("Pop method does not take arguments".to_string())
                         }
-                    } else {
-                        Err("Pop method does not take arguments".to_string())
-                    }
-                } else if method == "length" {
-                    // Array length method: arr.length()
-                    let object_val = self.evaluate_expr(object)?;
-                    
-                    // Verify no argument was provided
-                    if let Expr::Nil = argument.as_ref() {
-                        match object_val {
-                            Value::FixedArray(arr) | Value::DynamicArray(arr) => {
-                                Ok(Value::Number(arr.len() as f64))
+                    },
+                    "length" => {
+                        // Array length method: arr.length()
+                        // Verify no argument was provided
+                        if let Expr::Nil = argument.as_ref() {
+                            match object_val {
+                                Value::FixedArray(arr) | Value::DynamicArray(arr) => {
+                                    Ok(Value::Number(arr.len() as f64))
+                                }
+                                _ => Err("Length method can only be called on arrays".to_string()),
                             }
-                            _ => Err("Length method can only be called on arrays".to_string()),
+                        } else {
+                            Err("Length method does not take arguments".to_string())
                         }
-                    } else {
-                        Err("Length method does not take arguments".to_string())
-                    }
-                } else if method == "clear" {
-                    // Array clear method: arr.clear()
-                    let object_val = self.evaluate_expr(object)?;
-                    
-                    // Verify no argument was provided
-                    if let Expr::Nil = argument.as_ref() {
-                        match object_val {
-                            Value::DynamicArray(_) => {
-                                Ok(Value::DynamicArray(Vec::new()))
+                    },
+                    "clear" => {
+                        // Array clear method: arr.clear()
+                        // Verify no argument was provided
+                        if let Expr::Nil = argument.as_ref() {
+                            match object_val {
+                                Value::DynamicArray(_) => {
+                                    Ok(Value::DynamicArray(Vec::new()))
+                                }
+                                _ => Err("Clear method can only be called on dynamic arrays".to_string()),
                             }
-                            _ => Err("Clear method can only be called on dynamic arrays".to_string()),
+                        } else {
+                            Err("Clear method does not take arguments".to_string())
                         }
-                    } else {
-                        Err("Clear method does not take arguments".to_string())
-                    }
-                } else {
-                    Err(format!("Unsupported method: {}", method))
+                    },
+                    "format" => {
+                        // Date format method: date.format("%Y-%m-%d")
+                        if let Value::Date(dt) = object_val {
+                            let fmt_val = self.evaluate_expr(argument)?;
+                            if let Value::String(fmt) = fmt_val {
+                                Ok(Value::String(dt.format(&fmt).to_string()))
+                            } else {
+                                Err("Date.format() requires a string argument".to_string())
+                            }
+                        } else {
+                            Err("format method can only be called on Date objects".to_string())
+                        }
+                    },
+                    "getYear" => {
+                        // Date getYear method: date.getYear()
+                        if let Expr::Nil = argument.as_ref() {
+                            if let Value::Date(dt) = object_val {
+                                Ok(Value::Number(dt.year() as f64))
+                            } else {
+                                Err("getYear method can only be called on Date objects".to_string())
+                            }
+                        } else {
+                            Err("getYear method does not take arguments".to_string())
+                        }
+                    },
+                    "getMonth" => {
+                        // Date getMonth method: date.getMonth()
+                        if let Expr::Nil = argument.as_ref() {
+                            if let Value::Date(dt) = object_val {
+                                Ok(Value::Number(dt.month() as f64))
+                            } else {
+                                Err("getMonth method can only be called on Date objects".to_string())
+                            }
+                        } else {
+                            Err("getMonth method does not take arguments".to_string())
+                        }
+                    },
+                    "getDay" => {
+                        // Date getDay method: date.getDay()
+                        if let Expr::Nil = argument.as_ref() {
+                            if let Value::Date(dt) = object_val {
+                                Ok(Value::Number(dt.day() as f64))
+                            } else {
+                                Err("getDay method can only be called on Date objects".to_string())
+                            }
+                        } else {
+                            Err("getDay method does not take arguments".to_string())
+                        }
+                    },
+                    "keys" => {
+                        // Object keys method: obj.keys()
+                        if let Expr::Nil = argument.as_ref() {
+                            if let Value::Object(obj) = object_val {
+                                let keys = obj.keys().map(|k| Value::String(k.clone())).collect();
+                                Ok(Value::DynamicArray(keys))
+                            } else {
+                                Err("keys method can only be called on Object".to_string())
+                            }
+                        } else {
+                            Err("keys method does not take arguments".to_string())
+                        }
+                    },
+                    "insert" => {
+                        // Array insert method: arr.insert(index, value)
+                        if let Value::DynamicArray(mut arr) = object_val {
+                            if let Expr::Binary { left, operator: _, right, .. } = argument.as_ref() {
+                                if let (Expr::Number(index), _) = (left.as_ref(), right.as_ref()) {
+                                    let index = *index as usize;
+                                    if index > arr.len() {
+                                        return Err(format!("Insert index {} out of bounds (array length: {})", index, arr.len()));
+                                    }
+                                    let value = self.evaluate_expr(right)?;
+                                    arr.insert(index, value);
+                                    Ok(Value::DynamicArray(arr))
+                                } else {
+                                    Err("insert() requires (index, value) arguments".to_string())
+                                }
+                            } else {
+                                Err("insert() requires exactly two arguments".to_string())
+                            }
+                        } else {
+                            Err("insert method can only be called on dynamic arrays".to_string())
+                        }
+                    },
+                    "remove" => {
+                        // Array remove method: arr.remove(index)
+                        if let Value::DynamicArray(mut arr) = object_val {
+                            if let Expr::Number(index) = argument.as_ref() {
+                                let index = *index as usize;
+                                if index >= arr.len() {
+                                    return Err(format!("Remove index {} out of bounds (array length: {})", index, arr.len()));
+                                }
+                                let removed = arr.remove(index);
+                                Ok(removed)
+                            } else {
+                                Err("remove() requires a numeric index argument".to_string())
+                            }
+                        } else {
+                            Err("remove method can only be called on dynamic arrays".to_string())
+                        }
+                    },
+                    "reverse" => {
+                        // Array reverse method: arr.reverse()
+                        if let Expr::Nil = argument.as_ref() {
+                            match object_val {
+                                Value::DynamicArray(mut arr) => {
+                                    arr.reverse();
+                                    Ok(Value::DynamicArray(arr))
+                                }
+                                Value::FixedArray(mut arr) => {
+                                    arr.reverse();
+                                    Ok(Value::FixedArray(arr))
+                                }
+                                _ => Err("reverse method can only be called on arrays".to_string()),
+                            }
+                        } else {
+                            Err("reverse method does not take arguments".to_string())
+                        }
+                    },
+                    "toUpper" => {
+                        // String toUpper method: str.toUpper()
+                        if let Expr::Nil = argument.as_ref() {
+                            if let Value::String(s) = object_val {
+                                Ok(Value::String(s.to_uppercase()))
+                            } else {
+                                Err("toUpper method can only be called on strings".to_string())
+                            }
+                        } else {
+                            Err("toUpper method does not take arguments".to_string())
+                        }
+                    },
+                    "toLower" => {
+                        // String toLower method: str.toLower()
+                        if let Expr::Nil = argument.as_ref() {
+                            if let Value::String(s) = object_val {
+                                Ok(Value::String(s.to_lowercase()))
+                            } else {
+                                Err("toLower method can only be called on strings".to_string())
+                            }
+                        } else {
+                            Err("toLower method does not take arguments".to_string())
+                        }
+                    },
+                    "trim" => {
+                        // String trim method: str.trim()
+                        if let Expr::Nil = argument.as_ref() {
+                            if let Value::String(s) = object_val {
+                                Ok(Value::String(s.trim().to_string()))
+                            } else {
+                                Err("trim method can only be called on strings".to_string())
+                            }
+                        } else {
+                            Err("trim method does not take arguments".to_string())
+                        }
+                    },
+                    "set" => {
+                        // Object set method: obj.set(key, value)
+                        if let Value::Object(mut obj) = object_val {
+                            if let Expr::Binary { left, operator: _, right, .. } = argument.as_ref() {
+                                // Evaluate the key to get its string value
+                                let key_val = self.evaluate_expr(left)?;
+                                let key = match key_val {
+                                    Value::String(s) => s,
+                                    _ => return Err("set() requires (key, value) arguments where key is a string".to_string()),
+                                };
+                                let value = self.evaluate_expr(right)?;
+                                obj.insert(key, value);
+                                Ok(Value::Object(obj))
+                            } else {
+                                Err("set() requires exactly two arguments".to_string())
+                            }
+                        } else {
+                            Err("set method can only be called on objects".to_string())
+                        }
+                    },
+                    "get" => {
+                        // Object get method: obj.get(key)
+                        if let Value::Object(obj) = object_val {
+                            let key_val = self.evaluate_expr(argument)?;
+                            let key = match key_val {
+                                Value::String(s) => s,
+                                _ => return Err("get() requires a string key argument".to_string()),
+                            };
+                            if let Some(value) = obj.get(&key) {
+                                Ok(value.clone())
+                            } else {
+                                Ok(Value::Nil) // Return nil if key doesn't exist
+                            }
+                        } else {
+                            Err("get method can only be called on objects".to_string())
+                        }
+                    },
+                    "has" => {
+                        // Object has method: obj.has(key)
+                        if let Value::Object(obj) = object_val {
+                            let key_val = self.evaluate_expr(argument)?;
+                            let key = match key_val {
+                                Value::String(s) => s,
+                                _ => return Err("has() requires a string key argument".to_string()),
+                            };
+                            Ok(Value::Boolean(obj.contains_key(&key)))
+                        } else {
+                            Err("has method can only be called on objects".to_string())
+                        }
+                    },
+                    _ => Err(format!("Unsupported method: {}", method))
                 }
             }
             Expr::Transform { from: _, to: _ } => {
@@ -440,57 +678,57 @@ impl Interpreter {
 
     // Call a function with given arguments
     fn call_function(&mut self, name: &str, arguments: &[Expr]) -> Result<Value, String> {
-        // Get the function from globals
-        let function = if let Some(Value::Function(params, body)) = self.globals.get(name).cloned() {
-            (params, body)
-        } else {
-            return Err(format!("Undefined function '{}'", name));
-        };
-        
-        let (params, body) = function;
-        
-        // Check argument count
-        if arguments.len() != params.len() {
-            return Err(format!(
-                "Function '{}' expects {} arguments, got {}",
-                name,
-                params.len(),
-                arguments.len()
-            ));
-        }
-        
-        // Save current global state
-        let saved_globals = self.globals.clone();
-        
-        // Evaluate arguments and bind to parameters
-        for (param, arg) in params.iter().zip(arguments.iter()) {
-            let arg_value = self.evaluate_expr(arg)?;
-            self.globals.insert(param.clone(), arg_value);
-        }
-        
-        // Execute function body with return handling
-        let result = self.execute_stmt(&body);
-        
-        // Restore global state
-        self.globals = saved_globals;
-        
-        // Handle return value
-        match result? {
-            ControlFlow::Return(value) => Ok(value),
-            ControlFlow::None => Ok(Value::Nil),
+        // Check for built-in functions first
+        match name {
+            "readline" => self.builtin_readline(arguments),
+            "printErr" => self.builtin_print_err(arguments),
+            "Date" => self.builtin_date(arguments),
+            "Object" => self.builtin_object(arguments),
+            _ => {
+                // Check for user-defined functions
+                let function = if let Some(Value::Function(params, body)) = self.globals.get(name).cloned() {
+                    (params, body)
+                } else {
+                    return Err(format!("Undefined function '{}'", name));
+                };
+                
+                let (params, body) = function;
+                
+                // Check argument count
+                if arguments.len() != params.len() {
+                    return Err(format!(
+                        "Function '{}' expects {} arguments, got {}",
+                        name,
+                        params.len(),
+                        arguments.len()
+                    ));
+                }
+                
+                // Save current global state
+                let saved_globals = self.globals.clone();
+                
+                // Evaluate arguments and bind to parameters
+                for (param, arg) in params.iter().zip(arguments.iter()) {
+                    let arg_value = self.evaluate_expr(arg)?;
+                    self.globals.insert(param.clone(), arg_value);
+                }
+                
+                // Execute function body with return handling
+                let result = self.execute_stmt(&body);
+                
+                // Restore global state
+                self.globals = saved_globals;
+                
+                // Handle return value
+                match result? {
+                    ControlFlow::Return(value) => Ok(value),
+                    ControlFlow::None => Ok(Value::Nil),
+                }
+            }
         }
     }
     
-    // Check if two values are equal
-    fn is_equal(&self, a: &Value, b: &Value) -> bool {
-        match (a, b) {
-            (Value::Number(a), Value::Number(b)) => a == b, // Compare numbers
-            (Value::String(a), Value::String(b)) => a == b, // Compare strings
-            (Value::Boolean(a), Value::Boolean(b)) => a == b, // Compare booleans
-            (Value::Nil, Value::Nil) => true, // Both nil
-            _ => false, // Otherwise, not equal
-        }
-    }
+
     
     // Load a module and import specified names
     fn load_module(&mut self, names: &[String], module_path: &str) -> Result<(), String> {
@@ -558,5 +796,97 @@ impl Interpreter {
         }
         
         Ok(())
+    }
+    
+    // Built-in function: readline() - Read input from console
+    fn builtin_readline(&mut self, arguments: &[Expr]) -> Result<Value, String> {
+        if !arguments.is_empty() {
+            return Err("readline() takes no arguments".to_string());
+        }
+        
+        print!("Enter input: ");
+        io::stdout().flush().unwrap();
+        
+        let mut input = String::new();
+        match io::stdin().read_line(&mut input) {
+            Ok(_) => {
+                // Remove trailing newline
+                if input.ends_with('\n') {
+                    input.pop();
+                    if input.ends_with('\r') {
+                        input.pop();
+                    }
+                }
+                Ok(Value::String(input))
+            }
+            Err(e) => Err(format!("Error reading input: {}", e)),
+        }
+    }
+    
+    // Built-in function: printErr() - Print to stderr
+    fn builtin_print_err(&mut self, arguments: &[Expr]) -> Result<Value, String> {
+        if arguments.len() != 1 {
+            return Err("printErr() takes exactly one argument".to_string());
+        }
+        
+        let value = self.evaluate_expr(&arguments[0])?;
+        eprintln!("{}", value.to_string());
+        Ok(Value::Nil)
+    }
+    
+    // Built-in function: Date() - Create a new Date object
+    fn builtin_date(&mut self, arguments: &[Expr]) -> Result<Value, String> {
+        match arguments.len() {
+            0 => {
+                // Current date and time
+                Ok(Value::Date(Local::now()))
+            }
+            1 => {
+                // Parse date from string
+                let date_str = self.evaluate_expr(&arguments[0])?;
+                if let Value::String(s) = date_str {
+                    // Try to parse common date formats
+                    use chrono::{NaiveDateTime, TimeZone};
+                    
+                    // Try ISO format first
+                    if let Ok(naive) = NaiveDateTime::parse_from_str(&s, "%Y-%m-%d %H:%M:%S") {
+                        Ok(Value::Date(Local.from_local_datetime(&naive).single().unwrap_or(Local::now())))
+                    } else if let Ok(naive_date) = chrono::NaiveDate::parse_from_str(&s, "%Y-%m-%d") {
+                        let naive = naive_date.and_hms_opt(0, 0, 0).unwrap();
+                        Ok(Value::Date(Local.from_local_datetime(&naive).single().unwrap_or(Local::now())))
+                    } else {
+                        Err(format!("Unable to parse date: '{}'", s))
+                    }
+                } else {
+                    Err("Date() argument must be a string".to_string())
+                }
+            }
+            3 => {
+                // Year, month, day
+                let year = self.evaluate_expr(&arguments[0])?;
+                let month = self.evaluate_expr(&arguments[1])?;
+                let day = self.evaluate_expr(&arguments[2])?;
+                
+                if let (Value::Number(y), Value::Number(m), Value::Number(d)) = (year, month, day) {
+                    use chrono::{NaiveDate, TimeZone};
+                    if let Some(naive_date) = NaiveDate::from_ymd_opt(y as i32, m as u32, d as u32) {
+                        let naive_datetime = naive_date.and_hms_opt(0, 0, 0).unwrap();
+                        Ok(Value::Date(Local.from_local_datetime(&naive_datetime).single().unwrap_or(Local::now())))
+                    } else {
+                        Err("Invalid date values".to_string())
+                    }
+                } else {
+                    Err("Date() year, month, and day must be numbers".to_string())
+                }
+            }
+            _ => Err("Date() takes 0, 1, or 3 arguments".to_string()),
+        }
+    }
+    
+    // Built-in function: Object() - Create a new Object
+    fn builtin_object(&mut self, _arguments: &[Expr]) -> Result<Value, String> {
+        // For now, just create an empty object
+        // In a full implementation, we might accept key-value pairs
+        Ok(Value::Object(HashMap::new()))
     }
 }

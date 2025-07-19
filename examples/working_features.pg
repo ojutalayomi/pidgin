@@ -1,0 +1,19 @@
+// Test working new features
+
+// Test Object creation
+let obj = Object();
+print "Created object: {}", obj;
+
+// Test printErr
+printErr("This is an error message");
+
+// Test arrays with built-in methods
+let arr = {1, 2, 3};
+print "Array: {}", arr;
+print "Array length: {}", arr.length();
+
+// Test current date
+let now = Date();
+print "Current date: {}", now;
+
+print "All tests completed!";

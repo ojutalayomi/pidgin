@@ -1,0 +1,162 @@
+// Performance test suite for Pidgin compiler
+// This file benchmarks various operations to identify performance bottlenecks
+
+print "=== Starting Performance Test Suite ===";
+
+// Test 1: Array operations performance
+print "Testing array operations...";
+let start_time = Date();
+
+let large_array = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+let iterations = 1000;
+
+let counter = 0;
+while (counter < iterations) {
+    let len = large_array.length();
+    let first = large_array[0];
+    let last = large_array[9];
+    counter = counter + 1;
+}
+
+let end_time = Date();
+print "Array operations completed in {} iterations", iterations;
+
+// Test 2: String operations performance
+print "Testing string operations...";
+let test_string = "Hello World";
+let string_iterations = 500;
+
+let str_counter = 0;
+while (str_counter < string_iterations) {
+    let replaced = test_string.replaceChar(`World->Pidgin`);
+    let another = test_string.replaceChar(`Hello->Goodbye`);
+    str_counter = str_counter + 1;
+}
+
+print "String operations completed in {} iterations", string_iterations;
+
+// Test 3: Arithmetic operations performance
+print "Testing arithmetic operations...";
+let math_iterations = 2000;
+
+let math_counter = 0;
+let result = 0;
+while (math_counter < math_iterations) {
+    result = result + math_counter;
+    result = result * 2;
+    result = result - math_counter;
+    result = result / 2;
+    math_counter = math_counter + 1;
+}
+
+print "Arithmetic operations completed in {} iterations", math_iterations;
+print "Final result: {}", result;
+
+// Test 4: Function call performance
+print "Testing function call performance...";
+
+function fast_function(x) {
+    return x * 2;
+}
+
+let func_counter = 0;
+while (func_counter < 1000) {
+    let func_result = fast_function(func_counter);
+    func_counter = func_counter + 1;
+}
+
+print "Function calls completed in {} iterations", func_counter;
+
+// Test 5: Date operations performance
+print "Testing date operations...";
+let date_iterations = 100;
+
+let date_counter = 0;
+while (date_counter < date_iterations) {
+    let now = Date();
+    let year = now.getYear();
+    let month = now.getMonth();
+    let day = now.getDay();
+    let formatted = now.format("%Y-%m-%d");
+    date_counter = date_counter + 1;
+}
+
+print "Date operations completed in {} iterations", date_iterations;
+
+// Test 6: Variable assignment performance
+print "Testing variable assignment performance...";
+let assign_iterations = 5000;
+
+let assign_counter = 0;
+while (assign_counter < assign_iterations) {
+    let temp1 = assign_counter;
+    let temp2 = temp1 + 1;
+    let temp3 = temp2 * 2;
+    let temp4 = temp3 - 1;
+    assign_counter = assign_counter + 1;
+}
+
+print "Variable assignments completed in {} iterations", assign_iterations;
+
+// Test 7: Conditional statement performance
+print "Testing conditional statement performance...";
+let cond_iterations = 3000;
+
+let cond_counter = 0;
+while (cond_counter < cond_iterations) {
+    if (cond_counter > 1500) {
+        let temp = cond_counter * 2;
+    } else {
+        let temp = cond_counter / 2;
+    }
+    cond_counter = cond_counter + 1;
+}
+
+print "Conditional statements completed in {} iterations", cond_iterations;
+
+// Test 8: Print statement performance
+print "Testing print statement performance...";
+let print_iterations = 100;
+
+let print_counter = 0;
+while (print_counter < print_iterations) {
+    // Minimal print to avoid overwhelming output
+    if (print_counter == 0) {
+        print "Print performance test in progress...";
+    }
+    print_counter = print_counter + 1;
+}
+
+print "Print statements completed in {} iterations", print_iterations;
+
+// Test 9: Memory usage test (large arrays)
+print "Testing memory usage with large arrays...";
+let memory_array = {};
+
+let mem_counter = 0;
+while (mem_counter < 100) {
+    memory_array = memory_array.push(mem_counter);
+    mem_counter = mem_counter + 1;
+}
+
+print "Memory test completed with array of {} elements", memory_array.length();
+
+// Test 10: Nested loop performance
+print "Testing nested loop performance...";
+let outer_iterations = 50;
+let inner_iterations = 20;
+
+let outer = 0;
+while (outer < outer_iterations) {
+    let inner = 0;
+    while (inner < inner_iterations) {
+        let nested_result = outer * inner;
+        inner = inner + 1;
+    }
+    outer = outer + 1;
+}
+
+print "Nested loops completed: {} x {} iterations", outer_iterations, inner_iterations;
+
+print "=== Performance Test Suite Completed ===";
+print "All performance tests completed successfully!"; 

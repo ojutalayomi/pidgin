@@ -1,0 +1,4 @@
+// Debug what Date(2024, 1, 1) returns
+let birthday = Date(2024, 1, 1);
+print "Birthday value: {}", birthday;
+print "Test completed";

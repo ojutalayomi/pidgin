@@ -1,0 +1,6 @@
+// Debug test
+let x = 42;
+print "Number: {}", x;
+
+let s = "hello";
+print "String: {}", s;

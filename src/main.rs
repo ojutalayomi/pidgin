@@ -18,19 +18,60 @@ use crate::interpreter::Interpreter; // Import the Interpreter struct
 fn main() {
     let args: Vec<String> = env::args().collect(); // Collect command-line arguments
     if args.len() > 1 {
-        let path = &args[1]; // Get the file path from arguments
+        let first_arg = &args[1]; // Get the first argument
+        
+        // Check for standalone flags first
+        match first_arg.as_str() {
+            "--help" | "-h" => {
+                print_help();
+                return;
+            }
+            "--version" | "-v" => {
+                display_version();
+                return;
+            }
+            _ => {}
+        }
+        
+        // If not a standalone flag, treat as file path
+        let path = first_arg;
+        
+        // Check file extension (for all file operations)
         if !path.ends_with(".pg") {
             let dot_index = path.rfind('.').unwrap_or(path.len());
             let ext = &path[dot_index..];
-            panic!("Expected .pg file but got {} from {}", ext, path); // Panic if the file is not a .pg file
+            panic!("Expected .pg file but got {} from {}", ext, path);
         }
-        if args.len() > 2 && args[2] == "--tokens" {
-            display_tokens(path); // Display tokens if --tokens flag is present
-        } else if args.len() > 2 && args[2] == "--ast" {
-            display_ast(path); // Display AST if --ast flag is present
-        } else {
-            run_file(path); // Otherwise, run the file
+
+        // Check for file-specific flags
+        if args.len() > 2 {
+            match args[2].as_str() {
+                "--tokens" => {
+                    display_tokens(path);
+                    return;
+                }
+                "--ast" => {
+                    display_ast(path);
+                    return;
+                }
+                "--help" => {
+                    print_help();
+                    return;
+                }
+                "--version" => {
+                    display_version();
+                    return;
+                }
+                _ => {
+                    eprintln!("Unknown flag: {}", args[2]);
+                    eprintln!("Available flags: --tokens, --ast, --help, --version");
+                    std::process::exit(1);
+                }
+            }
         }
+
+        // Run the file if no flags were provided
+        run_file(path);
     } else {
         run_prompt(); // If no file is given, start REPL prompt
     }
@@ -152,4 +193,11 @@ fn display_ast(path: &str) {
         Ok(program) => println!("{:?}", program), // Print AST if parsing succeeds
         Err(e) => eprintln!("Parse error: {}", e), // Print error if parsing fails
     }
+}
+
+// Display the version of the compiler
+fn display_version() {
+    println!("Pidgin Compiler v{}", env!("CARGO_PKG_VERSION"));
+    println!("Platform: {}", std::env::var("TARGET").unwrap_or_default());
+    println!("Build Date: {}", std::env::var("VERGEN_BUILD_TIMESTAMP").unwrap_or_default());
 }

@@ -475,10 +475,10 @@ impl Parser {
         // Check for method calls
         while self.check(&Token::Dot) {
             self.advance(); // consume '.'
-            let method_name = if let Token::Identifier(name) = &self.peek().token {
-                name.clone()
-            } else {
-                return Err("Expect method name after '.'.".to_string());
+            let method_name = match &self.peek().token {
+                Token::Identifier(name) => name.clone(),
+                Token::Get => "get".to_string(), // Handle 'get' as method name
+                _ => return Err("Expect method name after '.'.".to_string()),
             };
             self.advance(); // consume method name
             
@@ -501,11 +501,40 @@ impl Parser {
                 let arg = self.expression()?;
                 self.consume(&Token::RightParen, "Expect ')' after push argument")?;
                 arg
-            } else if method_name == "pop" || method_name == "length" || method_name == "clear" {
+            } else if method_name == "pop" || method_name == "length" || method_name == "clear" || 
+                      method_name == "reverse" || method_name == "toUpper" || method_name == "toLower" || 
+                      method_name == "trim" || method_name == "getYear" || method_name == "getMonth" || 
+                      method_name == "getDay" || method_name == "keys" {
                 // These methods don't take arguments
                 self.consume(&Token::LeftParen, "Expect '(' after method name")?;
                 self.consume(&Token::RightParen, "Expect ')' after method name")?;
                 Expr::Nil // Use Nil as placeholder for no argument
+            } else if method_name == "insert" || method_name == "set" {
+                // These methods take two arguments: (arg1, arg2)
+                self.consume(&Token::LeftParen, "Expect '(' after method name")?;
+                let arg1 = self.expression()?;
+                self.consume(&Token::Comma, "Expect ',' between arguments")?;
+                let arg2 = self.expression()?;
+                self.consume(&Token::RightParen, "Expect ')' after arguments")?;
+                Expr::Binary {
+                    left: Box::new(arg1),
+                    operator: crate::ast::BinaryOp::Add, // Use Add as placeholder, will be ignored
+                    right: Box::new(arg2),
+                    line: 0,
+                    column: 0,
+                }
+            } else if method_name == "remove" || method_name == "get" || method_name == "has" {
+                // These methods take one argument
+                self.consume(&Token::LeftParen, "Expect '(' after method name")?;
+                let arg = self.expression()?;
+                self.consume(&Token::RightParen, "Expect ')' after argument")?;
+                arg
+            } else if method_name == "format" {
+                // format method takes one argument
+                self.consume(&Token::LeftParen, "Expect '(' after method name")?;
+                let arg = self.expression()?;
+                self.consume(&Token::RightParen, "Expect ')' after argument")?;
+                arg
             } else {
                 return Err(format!("Unsupported method: {}", method_name));
             };

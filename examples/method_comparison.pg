@@ -1,0 +1,10 @@
+// Test working methods
+let arr = {1, 2, 3};
+let len = arr.length();
+print "Array length: {}", len;
+
+// Test problematic method
+let birthday = Date(2024, 1, 1);
+// This should work:
+let year = birthday.getYear();
+print "Year: {}", year;

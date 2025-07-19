@@ -1,0 +1,34 @@
+// Test new features: Objects, Date, readline, printErr
+
+// Test Object creation and manipulation
+let obj = Object();
+print "Created object: {}", obj;
+
+// Test Date creation and methods
+let now = Date();
+print "Current date: {}", now;
+
+let birthday = Date(2024, 1, 1);
+print "Birthday: {}", birthday;
+
+let formatted = birthday.format("%Y-%m-%d");
+print "Formatted birthday: {}", formatted;
+
+let year = now.getYear();
+let month = now.getMonth();
+let day = now.getDay();
+print "Today is: {}/{}/{}", year, month, day;
+
+// Test arrays with built-in methods
+let arr = {1, 2, 3};
+print "Array: {}", arr;
+print "Array length: {}", arr.length();
+
+// Test error printing
+printErr("This is an error message {}", "test");
+
+// Test readline (uncomment to test interactively)
+// let input = readline();
+// print "You entered: {}", input;
+
+print "All tests completed!";

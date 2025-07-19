@@ -37,11 +37,55 @@ jobs:
       - name: Test
         run: cargo test
 
-      - name: Run examples
+      - name: Run basic examples
         run: |
           cargo run examples/hello.pg
           cargo run examples/simple.pg
           cargo run examples/fibonacci.pg
+
+      - name: Run comprehensive tests
+        run: |
+          echo "Running comprehensive test suite..."
+          cargo run examples/comprehensive_test.pg
+          echo "Comprehensive tests completed"
+
+      - name: Run performance tests
+        run: |
+          echo "Running performance test suite..."
+          cargo run examples/performance_test.pg
+          echo "Performance tests completed"
+
+      - name: Run feature-specific tests
+        run: |
+          echo "Running array tests..."
+          cargo run examples/array_test.pg
+          echo "Running new features tests..."
+          cargo run examples/test_new_features.pg
+          echo "Running method tests..."
+          cargo run examples/method_comparison.pg
+          echo "Running date tests..."
+          cargo run examples/simple_date_test.pg
+          echo "Running string method tests..."
+          cargo run examples/replaceChar_test.pg
+          echo "Running new methods tests..."
+          cargo run examples/new_methods_test.pg
+          echo "Running final integration test..."
+          cargo run examples/final_integration_test.pg
+
+      - name: Test debug modes
+        run: |
+          echo "Testing token display..."
+          cargo run -- --tokens examples/hello.pg
+          echo "Testing AST display..."
+          cargo run -- --ast examples/hello.pg
+
+      - name: Test error handling
+        run: |
+          echo "Testing error conditions..."
+          cargo run examples/array_bounds_test.pg || true
+          cargo run examples/array_method_error_test.pg || true
+          cargo run examples/import_error_test.pg || true
+          echo "Error handling tests completed"
 
       - name: Build release for testing
         run: cargo build --release
@@ -50,4 +94,22 @@ jobs:
         run: |
           chmod +x scripts/create-distribution.sh
           ./scripts/create-distribution.sh test-platform ubuntu-latest
-          ls -la pidgin-compiler-test-platform/ 
+          ls -la pidgin-compiler-test-platform/
+
+      - name: Test REPL functionality
+        run: |
+          echo "Testing REPL input..."
+          echo 'print "Hello from REPL";' | cargo run
+          echo "REPL test completed"
+
+      - name: Performance benchmark
+        run: |
+          echo "Running performance benchmark..."
+          time cargo run examples/performance_test.pg
+          echo "Performance benchmark completed"
+
+      - name: Memory usage test
+        run: |
+          echo "Testing memory usage..."
+          /usr/bin/time -v cargo run examples/performance_test.pg 2>&1 | grep "Maximum resident set size" || true
+          echo "Memory usage test completed" 

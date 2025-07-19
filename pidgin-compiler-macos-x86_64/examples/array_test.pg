@@ -1,0 +1,39 @@
+// Test array creation and indexing
+let fixed = [1, 2, 3, 4, 5];
+let dynamic = {10, 20, 30};
+
+// Test array indexing
+print "Fixed array: {}", fixed;
+print "Dynamic array: {}", dynamic;
+print "fixed[0]: {}", fixed[0];
+print "fixed[2]: {}", fixed[2];
+print "dynamic[1]: {}", dynamic[1];
+
+// Test array length
+print "Fixed array length: {}", fixed.length();
+print "Dynamic array length: {}", dynamic.length();
+
+// Test dynamic array methods
+print "Before push: {}", dynamic;
+dynamic = dynamic.push(40);
+print "After push: {}", dynamic;
+print "New length: {}", dynamic.length();
+
+let popped = dynamic.pop();
+print "Popped value: {}", popped;
+print "After pop: {}", dynamic;
+
+// Test array bounds checking
+print "Trying to access fixed[10]...";
+// This should cause an error: fixed[10];
+
+// Test clear method
+print "Before clear: {}", dynamic;
+dynamic = dynamic.clear();
+print "After clear: {}", dynamic;
+print "Length after clear: {}", dynamic.length();
+
+// Test nested arrays
+let matrix = [[1, 2], [3, 4], [5, 6]];
+print "Matrix: {}", matrix;
+print "matrix[1][0]: {}", matrix[1][0]; 

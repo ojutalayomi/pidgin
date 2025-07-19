@@ -1,0 +1,3 @@
+// Simple date test
+let birthday = Date(2024, 1, 1);
+print "Birthday: {}", birthday;
