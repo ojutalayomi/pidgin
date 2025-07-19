@@ -1,4 +1,10 @@
-/target
+target
 pidgin-compiler-Darwin-x86_64.zip
 pidgin-compiler-dist/pidgin-compiler
-pidgin-compiler-Darwin-x86_64.zip
+pidgin-compiler-dist/examples
+pidgin-compiler-dist/run.bat
+pidgin-compiler-dist/run.sh
+pidgin-compiler-dist/README.md
+pidgin-compiler-dist/LICENSE
+pidgin-compiler-dist/pidgin-compiler
+pidgin-compiler-dist/pidgin-compiler.exe
