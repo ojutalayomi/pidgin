@@ -257,7 +257,7 @@ fn display_version() {
         .format("%Y-%m-%d %H:%M:%S UTC")
         .to_string();
 
-    println!("Platform: {}-{}", platform, arch);
-    println!("Build Date: {}", build_date);
+    println!("Platform: {platform}-{arch}");
+    println!("Build Date: {build_date}");
     // println!("Rust Version: {}", std::env::var("RUSTC_VERSION").unwrap_or("unknown".to_string()));
 }

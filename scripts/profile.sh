@@ -40,7 +40,7 @@ while (i < 100) {
     let upper = long_string.toUpper();
     let lower = long_string.toLower();
     let trimmed = long_string.trim();
-    let replaced = long_string.replaceChar(`very->extremely`);
+    let replaced = long_string.replaceChar`very -> extremely`;
     i = i + 1;
 }
 print "String operations completed";

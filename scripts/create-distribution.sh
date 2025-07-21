@@ -490,7 +490,7 @@ let message = greeting + " " + world;  # String concatenation
 
 # String replacement
 let text = "Hello World";
-let newText = text.replaceChar(`World` -> `Pidgin`);
+let newText = text.replaceChar`World -> Pidgin`;
 ```
 
 ### Print Statements
@@ -519,7 +519,7 @@ GET {Alpha, Beta} from math.pg;  # Import multiple functions
 - **Enhanced Error Reporting**: Improved line and column information in error messages
 - **Array Support**: Added fixed-size arrays `[1, 2, 3]` and dynamic arrays `{1, 2, 3}`
 - **Array Methods**: Added `length()`, `push()`, `pop()`, and `clear()` methods
-- **String Replacement**: Added `replaceChar()` method with transform syntax
+- **String Replacement**: Added `replaceChar` string method with transform syntax
 - **Module System**: Enhanced import system with support for multiple imports
 - **Better Type System**: Improved type checking and error messages
 - **Installation Scripts**: Added `install.sh` for easy installation

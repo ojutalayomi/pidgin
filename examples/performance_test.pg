@@ -28,8 +28,8 @@ let string_iterations = 500;
 
 let str_counter = 0;
 while (str_counter < string_iterations) {
-    let replaced = test_string.replaceChar(`World->Pidgin`);
-    let another = test_string.replaceChar(`Hello->Goodbye`);
+    let replaced = test_string.replaceChar`World -> Pidgin`;
+    let another = test_string.replaceChar`Hello -> Goodbye`;
     str_counter = str_counter + 1;
 }
 

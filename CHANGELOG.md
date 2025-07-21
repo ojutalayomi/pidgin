@@ -7,7 +7,7 @@ All notable changes to the Pidgin Compiler project will be documented in this fi
 ### Added
 - **Array Support**: Added fixed-size arrays `[1, 2, 3]` and dynamic arrays `{1, 2, 3}`
 - **Array Methods**: Added `length()`, `push()`, `pop()`, and `clear()` methods for dynamic arrays
-- **String Replacement**: Added `replaceChar()` method with transform syntax
+- **String Replacement**: Added `replaceChar` string method with transform syntax
 - **Enhanced Module System**: Improved import system with support for multiple imports
 - **Installation Scripts**: Added `install.sh` for Unix-like systems
 - **Update Command**: Added `pidgin-compiler update` command for easy updates

@@ -71,7 +71,7 @@ dynamic = dynamic.clear();         // Remove all elements
 ### String Methods
 ```pidgin
 let text = "Hello World";
-let replaced = text.replaceChar(`World->Pidgin`);
+let replaced = text.replaceChar`World->Pidgin`;
 // Result: "Hello Pidgin"
 ```
 
@@ -219,7 +219,7 @@ print "Components: {}/{}/{}", year, month, day;
 ### String Manipulation
 ```pidgin
 let message = "Hello World";
-let updated = message.replaceChar(`World->Pidgin`);
+let updated = message.replaceChar`World -> Pidgin`;
 print "Original: {}", message;
 print "Updated: {}", updated;
 ```
