@@ -81,8 +81,7 @@ fn get_latest_version() -> Result<String, String> {
             );
         } else {
             return Err(format!(
-                "Failed to fetch latest version (HTTP {})",
-                status_code
+                "Failed to fetch latest version (HTTP {status_code})"
             ));
         }
     }
@@ -94,7 +93,7 @@ fn get_latest_version() -> Result<String, String> {
     if response.len() > 200 {
         println!("API Response (first 200 chars): {}", &response[..200]);
     } else {
-        println!("API Response: {}", response);
+        println!("API Response: {response}");
     }
 
     // More robust JSON parsing for tag_name
