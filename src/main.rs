@@ -126,7 +126,7 @@ fn run_prompt() {
                 match input {
                     ":version" | ":v" => {
                         display_version();
-                        break;
+                        continue;
                     }
                     "exit" | "quit" => {
                         println!("Goodbye!");

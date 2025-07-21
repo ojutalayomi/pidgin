@@ -30,21 +30,31 @@ pub fn update_compiler() -> Result<(), String> {
 
     // Get latest version from GitHub API
     println!("Checking for latest version...");
-    let latest_version = get_latest_version()?;
-    println!("Latest version: {latest_version}");
+    match get_latest_version() {
+        Ok(latest_version) => {
+            println!("Latest version: {latest_version}");
 
-    // Check if update is needed
-    if latest_version == format!("v{current_version}") {
-        println!("✓ You already have the latest version!");
-        return Ok(());
+            // Check if update is needed
+            if latest_version == format!("v{current_version}") {
+                println!("✓ You already have the latest version!");
+                return Ok(());
+            }
+
+            // Download and install update
+            println!("Downloading update...");
+            download_and_install_update(&latest_version, platform)?;
+
+            println!("✓ Update completed successfully!");
+            println!("New version: {latest_version}");
+        }
+        Err(e) => {
+            println!("⚠️  Could not check for updates: {e}");
+            println!("Current version: v{current_version}");
+            println!("To get the latest version, please visit:");
+            println!("https://github.com/ojutalayomi/pidgin/releases");
+            return Ok(());
+        }
     }
-
-    // Download and install update
-    println!("Downloading update...");
-    download_and_install_update(&latest_version, platform)?;
-
-    println!("✓ Update completed successfully!");
-    println!("New version: {latest_version}");
 
     Ok(())
 }
@@ -62,22 +72,57 @@ fn get_latest_version() -> Result<String, String> {
         .map_err(|e| format!("Failed to execute curl: {e}"))?;
 
     if !output.status.success() {
-        return Err("Failed to fetch latest version".to_string());
+        // Check if it's a 404 (repository not found) or other error
+        let status_code = output.status.code().unwrap_or(0);
+        if status_code == 404 {
+            return Err(
+                "Repository not found. Please check if the repository exists and is public."
+                    .to_string(),
+            );
+        } else {
+            return Err(format!(
+                "Failed to fetch latest version (HTTP {})",
+                status_code
+            ));
+        }
     }
 
     let response =
         String::from_utf8(output.stdout).map_err(|e| format!("Invalid UTF-8 response: {e}"))?;
 
-    // Parse JSON to extract tag_name
-    if let Some(tag_start) = response.find("\"tag_name\":\"") {
-        let tag_start = tag_start + 12; // Skip "tag_name":"
-        if let Some(tag_end) = response[tag_start..].find('"') {
-            let tag = &response[tag_start..tag_start + tag_end];
-            return Ok(tag.to_string());
+    // Debug: Print first 200 characters of response for troubleshooting
+    if response.len() > 200 {
+        println!("API Response (first 200 chars): {}", &response[..200]);
+    } else {
+        println!("API Response: {}", response);
+    }
+
+    // More robust JSON parsing for tag_name
+    let tag_patterns = ["\"tag_name\":\"", "\"tag_name\": \"", "\"tag_name\":"];
+
+    for pattern in &tag_patterns {
+        if let Some(tag_start) = response.find(pattern) {
+            let after_pattern = &response[tag_start + pattern.len()..];
+
+            // Find the end of the tag value
+            if let Some(tag_end) = after_pattern.find('"') {
+                let tag = &after_pattern[..tag_end];
+                if !tag.is_empty() {
+                    return Ok(tag.to_string());
+                }
+            } else if let Some(tag_end) = after_pattern.find(',') {
+                let tag = after_pattern[..tag_end].trim_matches('"').trim_matches(' ');
+                if !tag.is_empty() {
+                    return Ok(tag.to_string());
+                }
+            }
         }
     }
 
-    Err("Failed to parse version from API response".to_string())
+    Err(format!(
+        "Failed to parse version from API response. Response: {}",
+        &response[..response.len().min(500)]
+    ))
 }
 
 // Download and install the update
