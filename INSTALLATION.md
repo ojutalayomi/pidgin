@@ -1,6 +1,6 @@
 # Pidgin Compiler Installation Guide
 
-This guide shows you how to install the Pidgin compiler so you can use the `pidgin-compiler` command from anywhere on your system.
+This guide shows you how to install the Pidgin compiler so you can use the `pidgin` command from anywhere on your system.
 
 ## Quick Installation
 
@@ -26,8 +26,8 @@ The script will:
 cargo build --release
 
 # Install system-wide (requires sudo)
-sudo cp target/release/pidgin-compiler /usr/local/bin/
-sudo chmod +x /usr/local/bin/pidgin-compiler
+sudo cp target/release/pidgin /usr/local/bin/
+sudo chmod +x /usr/local/bin/pidgin
 ```
 
 #### Local Installation (no sudo required)
@@ -40,10 +40,10 @@ cargo build --release
 mkdir -p ~/.local/bin
 
 # Copy the executable
-cp target/release/pidgin-compiler ~/.local/bin/
+cp target/release/pidgin ~/.local/bin/
 
 # Make it executable
-chmod +x ~/.local/bin/pidgin-compiler
+chmod +x ~/.local/bin/pidgin
 ```
 
 ## Adding to PATH
@@ -75,11 +75,11 @@ export PATH="$HOME/.local/bin:$PATH"
    - Right-click "This PC" → Properties → Advanced system settings
    - Click "Environment Variables"
    - Under "User variables", find "Path" and click "Edit"
-   - Add the directory containing `pidgin-compiler.exe`
+   - Add the directory containing `pidgin.exe`
 
 2. **Using PowerShell:**
    ```powershell
-   $env:PATH += ";C:\path\to\pidgin-compiler"
+   $env:PATH += ";C:\path\to\pidgin"
    ```
 
 ## Verifying Installation
@@ -88,10 +88,10 @@ After installation and adding to PATH, restart your terminal and test:
 
 ```bash
 # Test the command
-pidgin-compiler --help
+pidgin --help
 
 # Run an example
-pidgin-compiler examples/hello.pg
+pidgin examples/hello.pg
 ```
 
 ## Usage Examples
@@ -100,19 +100,19 @@ Once installed, you can use the compiler from anywhere:
 
 ```bash
 # Run a program
-pidgin-compiler my-program.pg
+pidgin my-program.pg
 
 # Run from any directory
-pidgin-compiler /path/to/program.pg
+pidgin /path/to/program.pg
 
 # Start interactive mode
-pidgin-compiler
+pidgin
 
 # Show tokens (debug mode)
-pidgin-compiler --tokens my-program.pg
+pidgin --tokens my-program.pg
 
 # Show AST (debug mode)
-pidgin-compiler --ast my-program.pg
+pidgin --ast my-program.pg
 ```
 
 ## Installation Methods
@@ -132,8 +132,8 @@ sudo ./install.sh
 1. **Download the distribution:**
    ```bash
    # Extract the distribution
-   unzip pidgin-compiler-macos-x86_64.zip
-   cd pidgin-compiler-macos-x86_64
+   unzip pidgin-macos-x86_64.zip
+   cd pidgin-macos-x86_64
    ```
 
 2. **Install using the included script:**
@@ -149,13 +149,13 @@ cargo build --release
 
 # Choose installation location
 # Option A: System-wide (requires sudo)
-sudo cp target/release/pidgin-compiler /usr/local/bin/
-sudo chmod +x /usr/local/bin/pidgin-compiler
+sudo cp target/release/pidgin /usr/local/bin/
+sudo chmod +x /usr/local/bin/pidgin
 
 # Option B: Local installation
 mkdir -p ~/.local/bin
-cp target/release/pidgin-compiler ~/.local/bin/
-chmod +x ~/.local/bin/pidgin-compiler
+cp target/release/pidgin ~/.local/bin/
+chmod +x ~/.local/bin/pidgin
 ```
 
 ## Platform-Specific Instructions
@@ -189,7 +189,7 @@ sudo yum groupinstall "Development Tools"
 .\install.sh
 
 # Manual installation
-copy target\release\pidgin-compiler.exe C:\Windows\System32\
+copy target\release\pidgin.exe C:\Windows\System32\
 ```
 
 ## Troubleshooting
@@ -198,9 +198,9 @@ copy target\release\pidgin-compiler.exe C:\Windows\System32\
 
 1. **Check if the executable exists:**
    ```bash
-   ls -la ~/.local/bin/pidgin-compiler
+   ls -la ~/.local/bin/pidgin
    # or
-   ls -la /usr/local/bin/pidgin-compiler
+   ls -la /usr/local/bin/pidgin
    ```
 
 2. **Check if the directory is in PATH:**
@@ -217,9 +217,9 @@ copy target\release\pidgin-compiler.exe C:\Windows\System32\
 
 ```bash
 # Make the executable executable
-chmod +x ~/.local/bin/pidgin-compiler
+chmod +x ~/.local/bin/pidgin
 # or
-sudo chmod +x /usr/local/bin/pidgin-compiler
+sudo chmod +x /usr/local/bin/pidgin
 ```
 
 ### "No such file or directory" error
@@ -236,10 +236,10 @@ Remove the PATH line from your shell configuration file (~/.bashrc, ~/.zshrc, et
 
 ```bash
 # For local installation
-rm ~/.local/bin/pidgin-compiler
+rm ~/.local/bin/pidgin
 
 # For system-wide installation
-sudo rm /usr/local/bin/pidgin-compiler
+sudo rm /usr/local/bin/pidgin
 ```
 
 ## Advanced Installation
@@ -248,23 +248,23 @@ sudo rm /usr/local/bin/pidgin-compiler
 
 ```bash
 # Install to a custom directory
-mkdir -p /opt/pidgin-compiler
-cp target/release/pidgin-compiler /opt/pidgin-compiler/
-chmod +x /opt/pidgin-compiler/pidgin-compiler
+mkdir -p /opt/pidgin
+cp target/release/pidgin /opt/pidgin/
+chmod +x /opt/pidgin/pidgin
 
 # Add to PATH
-export PATH="/opt/pidgin-compiler:$PATH"
+export PATH="/opt/pidgin:$PATH"
 ```
 
 ### Multiple Versions
 
 ```bash
 # Install different versions
-cp target/release/pidgin-compiler ~/.local/bin/pidgin-compiler-v1.0
-cp target/release/pidgin-compiler ~/.local/bin/pidgin-compiler-v1.1
+cp target/release/pidgin ~/.local/bin/pidgin-v1.0
+cp target/release/pidgin ~/.local/bin/pidgin-v1.1
 
 # Use specific version
-pidgin-compiler-v1.0 my-program.pg
+pidgin-v1.0 my-program.pg
 ```
 
 ## Integration with IDEs
@@ -295,12 +295,12 @@ For distribution, you can create packages:
 ```ruby
 class PidginCompiler < Formula
   desc "A simple programming language compiler"
-  homepage "https://github.com/your-repo/pidgin-compiler"
-  url "https://github.com/your-repo/pidgin-compiler/releases/download/v1.0.0/pidgin-compiler-macos-x86_64.zip"
+  homepage "https://github.com/your-repo/pidgin"
+  url "https://github.com/your-repo/pidgin/releases/download/v1.0.0/pidgin-macos-x86_64.zip"
   sha256 "..."
 
   def install
-    bin.install "pidgin-compiler"
+    bin.install "pidgin"
   end
 end
 ```
@@ -312,4 +312,4 @@ Create a .deb package with proper installation scripts.
 
 ## Summary
 
-After following this guide, you'll be able to use the `pidgin-compiler` command from anywhere on your system, just like any other command-line tool. The compiler will be available in your PATH and ready to run any `.pg` file. 
+After following this guide, you'll be able to use the `pidgin` command from anywhere on your system, just like any other command-line tool. The compiler will be available in your PATH and ready to run any `.pg` file. 

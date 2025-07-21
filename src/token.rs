@@ -26,6 +26,8 @@ pub enum Token {
     While,    // 'while' keyword token
     Break,    // 'break' keyword
     Print,    // 'print' keyword token
+    PrintLn,  // 'printLn' keyword token
+    PrintErr, // 'printErr' keyword token
     Function, // 'function' keyword token
     True,     // 'true' boolean literal token
     False,    // 'false' boolean literal token
@@ -46,6 +48,10 @@ pub enum Token {
     Backtick,     // '`' backtick token
     Arrow,        // '->' arrow token
     ArrowLeft,    // '<-' arrow token
+    Colon,        // ':' colon token
+    ColonEqual,   // ':=' colon-equal token
+    AssignRight,  // '=>' arrow-right token
+    Imply,        // '<=>' imply token
 
     // Special
     Newline, // Newline token (for line breaks)

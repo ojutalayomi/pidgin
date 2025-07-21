@@ -22,7 +22,7 @@ echo "Current directory: $(pwd)"
 echo "Target directory exists: $(test -d target && echo "YES" || echo "NO")"
 if [ -d target ]; then
     echo "Target contents:"
-    find target -name "pidgin-compiler*" -type f 2>/dev/null || echo "No pidgin-compiler files found"
+    find target -name "pidgin*" -type f 2>/dev/null || echo "No pidgin files found"
     echo "Release directory exists: $(test -d target/release && echo "YES" || echo "NO")"
     if [ -d target/release ]; then
         echo "Release directory contents:"
@@ -32,111 +32,105 @@ fi
 echo "========================"
 
 # Create distribution directory
-mkdir -p "pidgin-compiler-$PLATFORM"
+mkdir -p "pidgin-$PLATFORM"
 
 # Copy executable
 if [ "$OS" = "windows-latest" ]; then
     # For Windows, look for the specific target
-    if [ -f "target/x86_64-pc-windows-msvc/release/pidgin-compiler.exe" ]; then
-        echo "Found executable at target/x86_64-pc-windows-msvc/release/pidgin-compiler.exe"
-        cp target/x86_64-pc-windows-msvc/release/pidgin-compiler.exe "pidgin-compiler-$PLATFORM/"
+    if [ -f "target/x86_64-pc-windows-msvc/release/pidgin.exe" ]; then
+        echo "Found executable at target/x86_64-pc-windows-msvc/release/pidgin.exe"
+        cp target/x86_64-pc-windows-msvc/release/pidgin.exe "pidgin-$PLATFORM/"
     else
-        echo "Error: Windows executable not found at target/x86_64-pc-windows-msvc/release/pidgin-compiler.exe"
+        echo "Error: Windows executable not found at target/x86_64-pc-windows-msvc/release/pidgin.exe"
         exit 1
     fi
 else
     # For Unix-like systems, try to find the executable
-    if [ -f "target/release/pidgin-compiler" ]; then
-        echo "Found executable at target/release/pidgin-compiler"
-        cp target/release/pidgin-compiler "pidgin-compiler-$PLATFORM/"
-    elif [ -f "target/x86_64-unknown-linux-gnu/release/pidgin-compiler" ]; then
-        echo "Found executable at target/x86_64-unknown-linux-gnu/release/pidgin-compiler"
-        cp target/x86_64-unknown-linux-gnu/release/pidgin-compiler "pidgin-compiler-$PLATFORM/"
-    elif [ -f "target/aarch64-unknown-linux-gnu/release/pidgin-compiler" ]; then
-        echo "Found executable at target/aarch64-unknown-linux-gnu/release/pidgin-compiler"
-        cp target/aarch64-unknown-linux-gnu/release/pidgin-compiler "pidgin-compiler-$PLATFORM/"
-    elif [ -f "target/x86_64-apple-darwin/release/pidgin-compiler" ]; then
-        echo "Found executable at target/x86_64-apple-darwin/release/pidgin-compiler"
-        cp target/x86_64-apple-darwin/release/pidgin-compiler "pidgin-compiler-$PLATFORM/"
-    elif [ -f "target/aarch64-apple-darwin/release/pidgin-compiler" ]; then
-        echo "Found executable at target/aarch64-apple-darwin/release/pidgin-compiler"
-        cp target/aarch64-apple-darwin/release/pidgin-compiler "pidgin-compiler-$PLATFORM/"
+    if [ -f "target/release/pidgin" ]; then
+        echo "Found executable at target/release/pidgin"
+        cp target/release/pidgin "pidgin-$PLATFORM/"
+    elif [ -f "target/x86_64-unknown-linux-gnu/release/pidgin" ]; then
+        echo "Found executable at target/x86_64-unknown-linux-gnu/release/pidgin"
+        cp target/x86_64-unknown-linux-gnu/release/pidgin "pidgin-$PLATFORM/"
+    elif [ -f "target/aarch64-unknown-linux-gnu/release/pidgin" ]; then
+        echo "Found executable at target/aarch64-unknown-linux-gnu/release/pidgin"
+        cp target/aarch64-unknown-linux-gnu/release/pidgin "pidgin-$PLATFORM/"
+    elif [ -f "target/x86_64-apple-darwin/release/pidgin" ]; then
+        echo "Found executable at target/x86_64-apple-darwin/release/pidgin"
+        cp target/x86_64-apple-darwin/release/pidgin "pidgin-$PLATFORM/"
+    elif [ -f "target/aarch64-apple-darwin/release/pidgin" ]; then
+        echo "Found executable at target/aarch64-apple-darwin/release/pidgin"
+        cp target/aarch64-apple-darwin/release/pidgin "pidgin-$PLATFORM/"
     else
         echo "Error: Executable not found. Available targets:"
-        find target -name "pidgin-compiler*" -type f 2>/dev/null || echo "No targets found"
+        find target -name "pidgin*" -type f 2>/dev/null || echo "No targets found"
         echo "Tried paths:"
-        echo "  - target/release/pidgin-compiler"
-        echo "  - target/x86_64-unknown-linux-gnu/release/pidgin-compiler"
-        echo "  - target/aarch64-unknown-linux-gnu/release/pidgin-compiler"
-        echo "  - target/x86_64-apple-darwin/release/pidgin-compiler"
-        echo "  - target/aarch64-apple-darwin/release/pidgin-compiler"
+        echo "  - target/release/pidgin"
+        echo "  - target/x86_64-unknown-linux-gnu/release/pidgin"
+        echo "  - target/aarch64-unknown-linux-gnu/release/pidgin"
+        echo "  - target/x86_64-apple-darwin/release/pidgin"
+        echo "  - target/aarch64-apple-darwin/release/pidgin"
         exit 1
     fi
 fi
 
 # Copy examples
-cp -r examples "pidgin-compiler-$PLATFORM/"
+cp -r examples "pidgin-$PLATFORM/"
 
 # Copy documentation files
 if [ -f "CHANGELOG.md" ]; then
     echo "Copying CHANGELOG.md"
-    cp CHANGELOG.md "pidgin-compiler-$PLATFORM/"
+    cp CHANGELOG.md "pidgin-$PLATFORM/"
 fi
 
 if [ -f "README.md" ]; then
     echo "Copying README.md"
-    cp README.md "pidgin-compiler-$PLATFORM/"
+    cp README.md "pidgin-$PLATFORM/"
 fi
 
 if [ -f "LICENSE" ]; then
     echo "Copying LICENSE"
-    cp LICENSE "pidgin-compiler-$PLATFORM/"
+    cp LICENSE "pidgin-$PLATFORM/"
 fi
 
 # Copy installation script (for Unix-like systems)
 if [ "$OS" != "windows-latest" ]; then
     if [ -f "install.sh" ]; then
         echo "Copying install.sh"
-        cp install.sh "pidgin-compiler-$PLATFORM/"
-        chmod +x "pidgin-compiler-$PLATFORM/install.sh"
+        cp install.sh "pidgin-$PLATFORM/"
+        chmod +x "pidgin-$PLATFORM/install.sh"
     else
         echo "Warning: install.sh not found, skipping"
     fi
     
-    # Copy update script (for Unix-like systems)
-    if [ -f "update.sh" ]; then
-        echo "Copying update.sh"
-        cp update.sh "pidgin-compiler-$PLATFORM/"
-        chmod +x "pidgin-compiler-$PLATFORM/update.sh"
-    else
-        echo "Warning: update.sh not found, skipping"
-    fi
+    # Note: Update functionality is now integrated into pidgin command
+    echo "Update functionality is integrated into pidgin command"
 fi
 
 # Create Windows installation script
 if [ "$OS" = "windows-latest" ]; then
     echo "Creating Windows install.bat"
-    cat > "pidgin-compiler-$PLATFORM/install.bat" << 'EOF'
+    cat > "pidgin-$PLATFORM/install.bat" << 'EOF'
 @echo off
 REM Pidgin Compiler Windows Installation Script
-REM This script installs the pidgin-compiler to a system-wide location
+REM This script installs the pidgin to a system-wide location
 
 echo Installing Pidgin Compiler for Windows...
 
 REM Get the directory where this script is located
 set SCRIPT_DIR=%~dp0
-set EXECUTABLE=%SCRIPT_DIR%pidgin-compiler.exe
+set EXECUTABLE=%SCRIPT_DIR%pidgin.exe
 
 REM Check if the executable exists
 if not exist "%EXECUTABLE%" (
-    echo Error: pidgin-compiler.exe not found in %SCRIPT_DIR%
+    echo Error: pidgin.exe not found in %SCRIPT_DIR%
     echo Please make sure you're running this script from the correct directory.
     pause
     exit /b 1
 )
 
 REM Try to install to Program Files (requires admin privileges)
-set INSTALL_DIR=%ProgramFiles%\pidgin-compiler
+set INSTALL_DIR=%ProgramFiles%\pidgin
 echo Attempting to install to: %INSTALL_DIR%
 
 REM Create installation directory
@@ -144,7 +138,7 @@ if not exist "%INSTALL_DIR%" (
     mkdir "%INSTALL_DIR%" 2>nul
     if errorlevel 1 (
         echo Failed to create installation directory. Trying alternative location...
-        set INSTALL_DIR=%USERPROFILE%\AppData\Local\pidgin-compiler
+        set INSTALL_DIR=%USERPROFILE%\AppData\Local\pidgin
         mkdir "%INSTALL_DIR%" 2>nul
         if errorlevel 1 (
             echo Failed to create installation directory: %INSTALL_DIR%
@@ -179,7 +173,7 @@ if %PATH_CHECK%==0 (
     echo.
     echo Installation completed successfully!
     echo.
-    echo To use pidgin-compiler from anywhere, add this directory to your PATH:
+    echo To use pidgin from anywhere, add this directory to your PATH:
     echo %INSTALL_DIR%
     echo.
     echo You can do this by:
@@ -191,10 +185,10 @@ if %PATH_CHECK%==0 (
     echo 6. Click "New" and add: %INSTALL_DIR%
     echo 7. Click "OK" on all dialogs
     echo.
-    echo After adding to PATH, you can run: pidgin-compiler.exe examples\hello.pg
+    echo After adding to PATH, you can run: pidgin.exe examples\hello.pg
 ) else (
     echo Installation completed successfully!
-    echo pidgin-compiler is now available as: pidgin-compiler.exe
+    echo pidgin is now available as: pidgin.exe
 )
 
 echo.
@@ -202,18 +196,13 @@ echo Installation complete!
 pause
 EOF
 
-    # Copy Windows update script
-    if [ -f "update.bat" ]; then
-        echo "Copying update.bat"
-        cp update.bat "pidgin-compiler-$PLATFORM/"
-    else
-        echo "Warning: update.bat not found, skipping"
-    fi
+    # Note: Update functionality is now integrated into pidgin command
+    echo "Update functionality is integrated into pidgin command"
 fi
 
 # Create runner scripts
 if [ "$OS" = "windows-latest" ]; then
-    cat > "pidgin-compiler-$PLATFORM/run.bat" << 'EOF'
+    cat > "pidgin-$PLATFORM/run.bat" << 'EOF'
 @echo off
 REM Pidgin Compiler Runner Script for Windows
 REM Usage: run.bat <file.pg>
@@ -226,11 +215,11 @@ if "%~1"=="" (
 
 REM Get the directory where this script is located
 set SCRIPT_DIR=%~dp0
-set EXECUTABLE=%SCRIPT_DIR%pidgin-compiler.exe
+set EXECUTABLE=%SCRIPT_DIR%pidgin.exe
 
 REM Check if the executable exists
 if not exist "%EXECUTABLE%" (
-    echo Error: pidgin-compiler.exe not found in %SCRIPT_DIR%
+    echo Error: pidgin.exe not found in %SCRIPT_DIR%
     exit /b 1
 )
 
@@ -238,7 +227,7 @@ REM Run the compiler
 "%EXECUTABLE%" %*
 EOF
 else
-    cat > "pidgin-compiler-$PLATFORM/run.sh" << 'EOF'
+    cat > "pidgin-$PLATFORM/run.sh" << 'EOF'
 #!/bin/bash
 
 # Pidgin Compiler Runner Script
@@ -252,11 +241,11 @@ fi
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-EXECUTABLE="$SCRIPT_DIR/pidgin-compiler"
+EXECUTABLE="$SCRIPT_DIR/pidgin"
 
 # Check if the executable exists
 if [ ! -f "$EXECUTABLE" ]; then
-    echo "Error: pidgin-compiler executable not found in $SCRIPT_DIR"
+    echo "Error: pidgin executable not found in $SCRIPT_DIR"
     exit 1
 fi
 
@@ -266,11 +255,11 @@ chmod +x "$EXECUTABLE"
 # Run the compiler
 "$EXECUTABLE" "$@"
 EOF
-    chmod +x "pidgin-compiler-$PLATFORM/run.sh"
+    chmod +x "pidgin-$PLATFORM/run.sh"
 fi
 
 # Create README
-cat > "pidgin-compiler-$PLATFORM/README.md" << EOF
+cat > "pidgin-$PLATFORM/README.md" << EOF
 # Pidgin Compiler - $PLATFORM
 
 This is the Pidgin compiler built for $PLATFORM.
@@ -280,7 +269,7 @@ This is the Pidgin compiler built for $PLATFORM.
 EOF
 
 if [ "$OS" = "windows-latest" ]; then
-    cat >> "pidgin-compiler-$PLATFORM/README.md" << 'EOF'
+    cat >> "pidgin-$PLATFORM/README.md" << 'EOF'
 ### On Windows:
 ```cmd
 run.bat examples\hello.pg
@@ -288,11 +277,11 @@ run.bat examples\hello.pg
 
 ### Direct execution:
 ```cmd
-pidgin-compiler.exe examples\hello.pg
+pidgin.exe examples\hello.pg
 ```
 EOF
 else
-    cat >> "pidgin-compiler-$PLATFORM/README.md" << 'EOF'
+    cat >> "pidgin-$PLATFORM/README.md" << 'EOF'
 ### On Unix-like systems (Linux, macOS):
 ```bash
 ./run.sh examples/hello.pg
@@ -300,12 +289,12 @@ else
 
 ### Direct execution:
 ```bash
-./pidgin-compiler examples/hello.pg
+./pidgin examples/hello.pg
 ```
 EOF
 fi
 
-cat >> "pidgin-compiler-$PLATFORM/README.md" << 'EOF'
+cat >> "pidgin-$PLATFORM/README.md" << 'EOF'
 
 ## Examples
 
@@ -314,7 +303,7 @@ Try running some of the included examples:
 EOF
 
 if [ "$OS" = "windows-latest" ]; then
-    cat >> "pidgin-compiler-$PLATFORM/README.md" << 'EOF'
+    cat >> "pidgin-$PLATFORM/README.md" << 'EOF'
 ```cmd
 # Hello World
 run.bat examples\hello.pg
@@ -327,7 +316,7 @@ run.bat examples\simple.pg
 ```
 EOF
 else
-    cat >> "pidgin-compiler-$PLATFORM/README.md" << 'EOF'
+    cat >> "pidgin-$PLATFORM/README.md" << 'EOF'
 ```bash
 # Hello World
 ./run.sh examples/hello.pg
@@ -341,7 +330,7 @@ else
 EOF
 fi
 
-cat >> "pidgin-compiler-$PLATFORM/README.md" << 'EOF'
+cat >> "pidgin-$PLATFORM/README.md" << 'EOF'
 
 ## Interactive Mode
 
@@ -350,27 +339,27 @@ To start the interactive REPL:
 EOF
 
 if [ "$OS" = "windows-latest" ]; then
-    cat >> "pidgin-compiler-$PLATFORM/README.md" << 'EOF'
+    cat >> "pidgin-$PLATFORM/README.md" << 'EOF'
 ```cmd
 run.bat
 ```
 EOF
 else
-    cat >> "pidgin-compiler-$PLATFORM/README.md" << 'EOF'
+    cat >> "pidgin-$PLATFORM/README.md" << 'EOF'
 ```bash
 ./run.sh
 ```
 EOF
 fi
 
-cat >> "pidgin-compiler-$PLATFORM/README.md" << 'EOF'
+cat >> "pidgin-$PLATFORM/README.md" << 'EOF'
 
 ## Installation
 
 EOF
 
 if [ "$OS" = "windows-latest" ]; then
-    cat >> "pidgin-compiler-$PLATFORM/README.md" << 'EOF'
+    cat >> "pidgin-$PLATFORM/README.md" << 'EOF'
 ### Windows Installation:
 You can install the compiler system-wide or use it locally:
 
@@ -388,15 +377,15 @@ The installation script will:
 - Copy the executable to Program Files (requires admin privileges)
 - Fall back to user directory if admin access is not available
 - Provide instructions for adding to PATH
-- Make it available as `pidgin-compiler.exe` command
+- Make it available as `pidgin.exe` command
 
 #### Updating:
 ```cmd
-update.bat
+pidgin.exe update
 ```
 EOF
 else
-    cat >> "pidgin-compiler-$PLATFORM/README.md" << 'EOF'
+    cat >> "pidgin-$PLATFORM/README.md" << 'EOF'
 ### Unix-like Installation (Linux, macOS):
 You can install the compiler system-wide or use it locally:
 
@@ -412,16 +401,16 @@ You can install the compiler system-wide or use it locally:
 
 The installation script will:
 - Copy the executable to `/usr/local/bin/` (requires sudo)
-- Make it available as `pidgin-compiler` command
+- Make it available as `pidgin` command
 
 #### Updating:
 ```bash
-./update.sh
+pidgin update
 ```
 EOF
 fi
 
-cat >> "pidgin-compiler-$PLATFORM/README.md" << 'EOF'
+cat >> "pidgin-$PLATFORM/README.md" << 'EOF'
 
 ## Language Features
 
@@ -533,7 +522,8 @@ GET {Alpha, Beta} from math.pg;  # Import multiple functions
 - **String Replacement**: Added `replaceChar()` method with transform syntax
 - **Module System**: Enhanced import system with support for multiple imports
 - **Better Type System**: Improved type checking and error messages
-- **Installation Scripts**: Added `install.sh` and `update.sh` for easy installation and updates
+- **Installation Scripts**: Added `install.sh` for easy installation
+- **Update Command**: Added `pidgin update` command for easy updates
 - **Windows Support**: Added Windows installation and update scripts
 
 ### System Requirements
@@ -543,17 +533,17 @@ GET {Alpha, Beta} from math.pg;  # Import multiple functions
 
 ### Command Line Options
 ```bash
-pidgin-compiler --help          # Show help information
-pidgin-compiler --version       # Show version information
-pidgin-compiler file.pg         # Run a Pidgin file
-pidgin-compiler file.pg --tokens # Show tokens for debugging
-pidgin-compiler file.pg --ast   # Show AST for debugging
+pidgin --help          # Show help information
+pidgin --version       # Show version information
+pidgin file.pg         # Run a Pidgin file
+pidgin file.pg --tokens # Show tokens for debugging
+pidgin file.pg --ast   # Show AST for debugging
 ```
 
 ### Interactive Mode
-Run `pidgin-compiler` without arguments to start the interactive REPL:
+Run `pidgin` without arguments to start the interactive REPL:
 ```bash
-pidgin-compiler
+pidgin
 pidgin> let x = 10;
 pidgin> print x;
 10
@@ -565,7 +555,7 @@ pidgin> exit
 ### Common Issues
 1. **Permission Denied**: Make sure the executable has execute permissions
    ```bash
-   chmod +x pidgin-compiler
+   chmod +x pidgin
    ```
 
 2. **Command Not Found**: Add the installation directory to your PATH
@@ -579,7 +569,7 @@ pidgin> exit
 ### Getting Help
 - **Documentation**: Check the examples directory for sample code
 - **Issues**: Report bugs on the GitHub repository
-- **Updates**: Use `./update.sh` (Unix) or `update.bat` (Windows) to get the latest version
+- **Updates**: Use `pidgin update` to get the latest version
 
 ## License
 This project is open source. See the LICENSE file for details.

@@ -145,4 +145,4 @@ jobs:
         run: |
           chmod +x scripts/create-distribution.sh
           ./scripts/create-distribution.sh test-platform ubuntu-latest
-          ls -la pidgin-compiler-test-platform/ 
+          ls -la pidgin-test-platform/ 

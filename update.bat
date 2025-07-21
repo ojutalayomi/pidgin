@@ -18,9 +18,9 @@ echo Detected platform: %PLATFORM%
 
 REM Find current installation
 set CURRENT_PATH=
-where pidgin-compiler.exe >nul 2>&1
+where pidgin.exe >nul 2>&1
 if %errorlevel% equ 0 (
-    for /f "tokens=*" %%i in ('where pidgin-compiler.exe') do set CURRENT_PATH=%%i
+    for /f "tokens=*" %%i in ('where pidgin.exe') do set CURRENT_PATH=%%i
     echo Current installation found at: %CURRENT_PATH%
 ) else (
     echo No current installation found
@@ -39,7 +39,7 @@ echo Latest version: %LATEST_VERSION%
 
 REM Check if we need to update
 if not "%CURRENT_PATH%"=="" (
-    for /f "tokens=*" %%i in ('pidgin-compiler.exe --version 2^>nul ^| findstr /r "v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"') do set CURRENT_VERSION=%%i
+    for /f "tokens=*" %%i in ('pidgin.exe --version 2^>nul ^| findstr /r "v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"') do set CURRENT_VERSION=%%i
     echo Current version: %CURRENT_VERSION%
     
     if "%CURRENT_VERSION%"=="%LATEST_VERSION%" (
@@ -53,12 +53,12 @@ set TEMP_DIR=%TEMP%\pidgin-update-%RANDOM%
 mkdir "%TEMP_DIR%"
 
 REM Download latest release
-set DOWNLOAD_URL=https://github.com/ojutalayomi/pidgin/releases/download/%LATEST_VERSION%/pidgin-compiler-%PLATFORM%.zip
+set DOWNLOAD_URL=https://github.com/ojutalayomi/pidgin/releases/download/%LATEST_VERSION%/pidgin-%PLATFORM%.zip
 echo Downloading latest release...
 
-powershell -Command "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '%DOWNLOAD_URL%' -OutFile '%TEMP_DIR%\pidgin-compiler-%PLATFORM%.zip'}"
+powershell -Command "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '%DOWNLOAD_URL%' -OutFile '%TEMP_DIR%\pidgin-%PLATFORM%.zip'}"
 
-if not exist "%TEMP_DIR%\pidgin-compiler-%PLATFORM%.zip" (
+if not exist "%TEMP_DIR%\pidgin-%PLATFORM%.zip" (
     echo Failed to download latest release
     rmdir /s /q "%TEMP_DIR%"
     exit /b 1
@@ -67,8 +67,8 @@ if not exist "%TEMP_DIR%\pidgin-compiler-%PLATFORM%.zip" (
 REM Extract the release
 echo Extracting release...
 cd /d "%TEMP_DIR%"
-powershell -Command "Expand-Archive -Path 'pidgin-compiler-%PLATFORM%.zip' -DestinationPath '.' -Force"
-cd "pidgin-compiler-%PLATFORM%"
+powershell -Command "Expand-Archive -Path 'pidgin-%PLATFORM%.zip' -DestinationPath '.' -Force"
+cd "pidgin-%PLATFORM%"
 
 REM Install the update
 echo Installing update...
@@ -77,7 +77,7 @@ if exist "install.bat" (
     if not "%CURRENT_PATH%"=="" (
         for %%i in ("%CURRENT_PATH%") do set INSTALL_DIR=%%~dpi
         echo Updating existing installation...
-        copy "pidgin-compiler.exe" "%CURRENT_PATH%" >nul
+        copy "pidgin.exe" "%CURRENT_PATH%" >nul
         echo Update completed successfully!
     ) else (
         echo Installing new version...
@@ -95,9 +95,9 @@ cd /d /
 rmdir /s /q "%TEMP_DIR%"
 
 REM Verify the update
-where pidgin-compiler.exe >nul 2>&1
+where pidgin.exe >nul 2>&1
 if %errorlevel% equ 0 (
-    for /f "tokens=*" %%i in ('pidgin-compiler.exe --version 2^>nul ^| findstr /r "v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"') do set NEW_VERSION=%%i
+    for /f "tokens=*" %%i in ('pidgin.exe --version 2^>nul ^| findstr /r "v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"') do set NEW_VERSION=%%i
     echo Update verified! New version: %NEW_VERSION%
 ) else (
     echo Warning: Could not verify the update
@@ -105,5 +105,5 @@ if %errorlevel% equ 0 (
 
 echo.
 echo Update complete!
-echo You can now use: pidgin-compiler.exe --version
+echo You can now use: pidgin.exe --version
 pause 

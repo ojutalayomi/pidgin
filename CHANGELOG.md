@@ -9,8 +9,9 @@ All notable changes to the Pidgin Compiler project will be documented in this fi
 - **Array Methods**: Added `length()`, `push()`, `pop()`, and `clear()` methods for dynamic arrays
 - **String Replacement**: Added `replaceChar()` method with transform syntax
 - **Enhanced Module System**: Improved import system with support for multiple imports
-- **Installation Scripts**: Added `install.sh` and `update.sh` for Unix-like systems
-- **Windows Support**: Added `install.bat` and `update.bat` for Windows
+- **Installation Scripts**: Added `install.sh` for Unix-like systems
+- **Update Command**: Added `pidgin-compiler update` command for easy updates
+- **Windows Support**: Added `install.bat` for Windows
 - **Distribution Scripts**: Automated distribution creation for multiple platforms
 - **GitHub Actions**: Automated CI/CD pipeline for builds and releases
 

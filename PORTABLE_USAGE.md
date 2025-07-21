@@ -13,22 +13,22 @@ This guide shows you how to run any `.pg` file on any computer using the portabl
 ### Step 1: Get the Distribution
 
 Download the appropriate distribution for your system:
-- **Windows**: `pidgin-compiler-windows-x86_64.zip`
-- **macOS (Intel)**: `pidgin-compiler-macos-x86_64.zip`
-- **macOS (Apple Silicon)**: `pidgin-compiler-macos-aarch64.zip`
-- **Linux (Intel/AMD)**: `pidgin-compiler-linux-x86_64.zip`
-- **Linux (ARM)**: `pidgin-compiler-linux-aarch64.zip`
+- **Windows**: `pidgin-windows-x86_64.zip`
+- **macOS (Intel)**: `pidgin-macos-x86_64.zip`
+- **macOS (Apple Silicon)**: `pidgin-macos-aarch64.zip`
+- **Linux (Intel/AMD)**: `pidgin-linux-x86_64.zip`
+- **Linux (ARM)**: `pidgin-linux-aarch64.zip`
 
 ### Step 2: Extract the Distribution
 
 **On Windows:**
 - Right-click the zip file and select "Extract All"
-- Or use PowerShell: `Expand-Archive pidgin-compiler-windows-x86_64.zip`
+- Or use PowerShell: `Expand-Archive pidgin-windows-x86_64.zip`
 
 **On macOS/Linux:**
 ```bash
-unzip pidgin-compiler-macos-x86_64.zip
-cd pidgin-compiler-macos-x86_64
+unzip pidgin-macos-x86_64.zip
+cd pidgin-macos-x86_64
 ```
 
 ### Step 3: Run Your Programs
@@ -157,7 +157,7 @@ while (count < 5) {
 ### "Permission denied" error
 **macOS/Linux:**
 ```bash
-chmod +x pidgin-compiler
+chmod +x pidgin
 chmod +x run.sh
 ```
 
@@ -169,7 +169,7 @@ chmod +x run.sh
 ### "Executable not found" error
 - Verify the executable exists in the distribution
 - Make sure you're using the correct architecture for your system
-- Try running it directly: `./pidgin-compiler my-file.pg`
+- Try running it directly: `./pidgin my-file.pg`
 
 ### Program doesn't work as expected
 - Check the error messages for line and column information
@@ -184,12 +184,12 @@ You can run programs from any directory:
 
 **Windows:**
 ```cmd
-C:\path\to\pidgin-compiler\run.bat C:\path\to\my-program.pg
+C:\path\to\pidgin\run.bat C:\path\to\my-program.pg
 ```
 
 **macOS/Linux:**
 ```bash
-/path/to/pidgin-compiler/run.sh /path/to/my-program.pg
+/path/to/pidgin/run.sh /path/to/my-program.pg
 ```
 
 ### Using Command Line Arguments
@@ -220,8 +220,8 @@ If you want to create a custom distribution with your own programs:
 
 Your distribution contains:
 ```
-pidgin-compiler-dist/
-├── pidgin-compiler          # The main executable
+pidgin-dist/
+├── pidgin          # The main executable
 ├── run.sh                   # Unix/Linux/macOS runner
 ├── run.bat                  # Windows runner
 ├── install.sh               # Installation script

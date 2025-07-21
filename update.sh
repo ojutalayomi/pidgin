@@ -44,8 +44,8 @@ echo -e "${GREEN}Detected platform: $PLATFORM${NC}"
 
 # Find current installation
 CURRENT_PATH=""
-if command -v pidgin-compiler >/dev/null 2>&1; then
-    CURRENT_PATH=$(which pidgin-compiler)
+if command -v pidgin >/dev/null 2>&1; then
+    CURRENT_PATH=$(which pidgin)
     echo -e "${GREEN}Current installation found at: $CURRENT_PATH${NC}"
 else
     echo -e "${YELLOW}No current installation found${NC}"
@@ -64,7 +64,7 @@ echo -e "${GREEN}Latest version: $LATEST_VERSION${NC}"
 
 # Check if we need to update
 if [ -n "$CURRENT_PATH" ]; then
-    CURRENT_VERSION=$(pidgin-compiler --version 2>/dev/null | grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "unknown")
+    CURRENT_VERSION=$(pidgin --version 2>/dev/null | grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "unknown")
     echo -e "${GREEN}Current version: $CURRENT_VERSION${NC}"
     
     if [ "$CURRENT_VERSION" = "$LATEST_VERSION" ]; then
@@ -74,11 +74,11 @@ if [ -n "$CURRENT_PATH" ]; then
 fi
 
 # Download latest release
-DOWNLOAD_URL="https://github.com/ojutalayomi/pidgin/releases/download/$LATEST_VERSION/pidgin-compiler-$PLATFORM.zip"
+DOWNLOAD_URL="https://github.com/ojutalayomi/pidgin/releases/download/$LATEST_VERSION/pidgin-$PLATFORM.zip"
 TEMP_DIR=$(mktemp -d)
 
 echo "Downloading latest release..."
-if ! curl -L -o "$TEMP_DIR/pidgin-compiler-$PLATFORM.zip" "$DOWNLOAD_URL"; then
+if ! curl -L -o "$TEMP_DIR/pidgin-$PLATFORM.zip" "$DOWNLOAD_URL"; then
     echo -e "${RED}Failed to download latest release${NC}"
     rm -rf "$TEMP_DIR"
     exit 1
@@ -87,8 +87,8 @@ fi
 # Extract the release
 echo "Extracting release..."
 cd "$TEMP_DIR"
-unzip -q "pidgin-compiler-$PLATFORM.zip"
-cd "pidgin-compiler-$PLATFORM"
+unzip -q "pidgin-$PLATFORM.zip"
+cd "pidgin-$PLATFORM"
 
 # Install the update
 echo "Installing update..."
@@ -97,7 +97,7 @@ if [ -f "install.sh" ]; then
     if [ -w "$(dirname "$CURRENT_PATH")" ]; then
         # We can write to the directory, so do a direct update
         echo "Updating existing installation..."
-        cp pidgin-compiler "$CURRENT_PATH"
+        cp pidgin "$CURRENT_PATH"
         chmod +x "$CURRENT_PATH"
         echo -e "${GREEN}✓ Update completed successfully!${NC}"
     else
@@ -115,8 +115,8 @@ cd /
 rm -rf "$TEMP_DIR"
 
 # Verify the update
-if command -v pidgin-compiler >/dev/null 2>&1; then
-    NEW_VERSION=$(pidgin-compiler --version 2>/dev/null | grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "unknown")
+if command -v pidgin >/dev/null 2>&1; then
+    NEW_VERSION=$(pidgin --version 2>/dev/null | grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "unknown")
     echo -e "${GREEN}✓ Update verified! New version: $NEW_VERSION${NC}"
 else
     echo -e "${YELLOW}Warning: Could not verify the update${NC}"
@@ -124,4 +124,4 @@ fi
 
 echo ""
 echo -e "${BLUE}Update complete!${NC}"
-echo "You can now use: pidgin-compiler --version" 
+echo "You can now use: pidgin --version" 

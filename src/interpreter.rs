@@ -144,45 +144,18 @@ impl Interpreter {
                 self.evaluate_expr(expr)?; // Evaluate the expression
                 Ok(ControlFlow::None) // No value to return
             }
+            Stmt::PrintLn { format, arguments } => {
+                self.print_value(format, arguments, false)?;
+                println!();
+                Ok(ControlFlow::None)
+            }
             Stmt::Print { format, arguments } => {
-                let format_value = self.evaluate_expr(format)?;
-
-                if arguments.is_empty() {
-                    // Simple print: print value;
-                    println!("{format_value}");
-                } else {
-                    // Format string print: print "{}", value;
-                    let format_str = match format_value {
-                        Value::String(s) => s,
-                        _ => return Err("Format string must be a string".to_string()),
-                    };
-
-                    // Evaluate all arguments
-                    let arg_values: Vec<String> = arguments
-                        .iter()
-                        .map(|arg| self.evaluate_expr(arg).map(|v| v.to_string()))
-                        .collect::<Result<_, _>>()?;
-
-                    // Replace each '{}' in format_str with the corresponding argument
-                    let mut formatted = String::new();
-                    let mut parts = format_str.split("{}");
-                    let mut args_iter = arg_values.iter();
-
-                    if let Some(first) = parts.next() {
-                        formatted.push_str(first);
-                    }
-                    for part in parts {
-                        if let Some(arg) = args_iter.next() {
-                            formatted.push_str(arg);
-                        } else {
-                            formatted.push_str("{}"); // Not enough arguments, keep as is
-                        }
-                        formatted.push_str(part);
-                    }
-                    // If there are extra arguments, ignore them
-
-                    println!("{formatted}"); // Print the value
-                }
+                self.print_value(format, arguments, false)?;
+                Ok(ControlFlow::None)
+            }
+            Stmt::PrintErr { format, arguments } => {
+                self.print_value(format, arguments, true)?;
+                println!();
                 Ok(ControlFlow::None)
             }
             Stmt::VarDeclaration { name, initializer } => {
@@ -246,6 +219,62 @@ impl Interpreter {
                 }
                 Ok(ControlFlow::None)
             }
+        }
+    }
+
+    fn print_value(
+        &mut self,
+        format: &Expr,
+        arguments: &[Expr],
+        is_err: bool,
+    ) -> Result<(), String> {
+        let format_value = self.evaluate_expr(format)?;
+
+        if arguments.is_empty() {
+            // Simple print: print value;
+            if is_err {
+                eprint!("{format_value}");
+            } else {
+                print!("{format_value}");
+            }
+            Ok(())
+        } else {
+            // Format string print: print "{}", value;
+            let format_str = match format_value {
+                Value::String(s) => s,
+                _ => return Err("Format string must be a string".to_string()),
+            };
+
+            // Evaluate all arguments
+            let arg_values: Vec<String> = arguments
+                .iter()
+                .map(|arg| self.evaluate_expr(arg).map(|v| v.to_string()))
+                .collect::<Result<_, _>>()?;
+
+            // Replace each '{}' in format_str with the corresponding argument
+            let mut formatted = String::new();
+            let mut parts = format_str.split("{}");
+            let mut args_iter = arg_values.iter();
+
+            if let Some(first) = parts.next() {
+                formatted.push_str(first);
+            }
+            for part in parts {
+                if let Some(arg) = args_iter.next() {
+                    formatted.push_str(arg);
+                } else {
+                    formatted.push_str("{}"); // Not enough arguments, keep as is
+                }
+                formatted.push_str(part);
+            }
+            // If there are extra arguments, ignore them
+
+            if is_err {
+                eprint!("{formatted}"); // Print the value
+            } else {
+                print!("{formatted}"); // Print the value
+            }
+            Ok(())
         }
     }
 
@@ -739,8 +768,7 @@ impl Interpreter {
     fn call_function(&mut self, name: &str, arguments: &[Expr]) -> Result<Value, String> {
         // Check for built-in functions first
         match name {
-            "readline" => self.builtin_readline(arguments),
-            "printErr" => self.builtin_print_err(arguments),
+            "readLine" => self.builtin_read_line(arguments),
             "Date" => self.builtin_date(arguments),
             "Object" => self.builtin_object(arguments),
             _ => {
@@ -822,7 +850,7 @@ impl Interpreter {
 
         // Parse the module
         let mut lexer = Lexer::new(&source);
-        let tokens = lexer.tokenize();
+        let tokens = lexer.tokenize()?;
         let mut parser = Parser::new(tokens);
         let program = parser
             .parse()
@@ -863,13 +891,12 @@ impl Interpreter {
         Ok(())
     }
 
-    // Built-in function: readline() - Read input from console
-    fn builtin_readline(&mut self, arguments: &[Expr]) -> Result<Value, String> {
+    // Built-in function: readLine() - Read input from console
+    fn builtin_read_line(&mut self, arguments: &[Expr]) -> Result<Value, String> {
         if !arguments.is_empty() {
-            return Err("readline() takes no arguments".to_string());
+            print!("{}", self.evaluate_expr(&arguments[0])?);
         }
 
-        print!("Enter input: ");
         io::stdout().flush().unwrap();
 
         let mut input = String::new();
@@ -886,17 +913,6 @@ impl Interpreter {
             }
             Err(e) => Err(format!("Error reading input: {e}")),
         }
-    }
-
-    // Built-in function: printErr() - Print to stderr
-    fn builtin_print_err(&mut self, arguments: &[Expr]) -> Result<Value, String> {
-        if arguments.len() != 1 {
-            return Err("printErr() takes exactly one argument".to_string());
-        }
-
-        let value = self.evaluate_expr(&arguments[0])?;
-        eprintln!("{value}");
-        Ok(Value::Nil)
     }
 
     // Built-in function: Date() - Create a new Date object
@@ -966,9 +982,42 @@ impl Interpreter {
     }
 
     // Built-in function: Object() - Create a new Object
-    fn builtin_object(&mut self, _arguments: &[Expr]) -> Result<Value, String> {
-        // For now, just create an empty object
-        // In a full implementation, we might accept key-value pairs
-        Ok(Value::Object(HashMap::new()))
+    fn builtin_object(&mut self, arguments: &[Expr]) -> Result<Value, String> {
+        let mut obj = HashMap::new();
+
+        // If no arguments, return empty object
+        if arguments.is_empty() {
+            return Ok(Value::Object(obj));
+        }
+
+        // If odd number of arguments, error
+        if arguments.len() % 2 != 0 {
+            return Err(
+                "Object() requires an even number of arguments (key-value pairs)".to_string(),
+            );
+        }
+
+        // Process arguments as key-value pairs
+        for i in (0..arguments.len()).step_by(2) {
+            let key_expr = &arguments[i];
+            let value_expr = &arguments[i + 1];
+
+            // Evaluate the key
+            let key_val = self.evaluate_expr(key_expr)?;
+            let key = match key_val {
+                Value::String(s) => s,
+                Value::Number(n) => n.to_string(),
+                Value::Boolean(b) => b.to_string(),
+                _ => return Err("Object() keys must be strings, numbers, or booleans".to_string()),
+            };
+
+            // Evaluate the value
+            let value = self.evaluate_expr(value_expr)?;
+
+            // Insert into object
+            obj.insert(key, value);
+        }
+
+        Ok(Value::Object(obj))
     }
 }

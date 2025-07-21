@@ -22,7 +22,7 @@ impl Lexer {
     }
 
     // Tokenize the input and return a vector of TokenInfo
-    pub fn tokenize(&mut self) -> Vec<TokenInfo> {
+    pub fn tokenize(&mut self) -> Result<Vec<TokenInfo>, String> {
         let mut tokens = Vec::new(); // Create a vector to store tokens
 
         while !self.is_at_end() {
@@ -79,12 +79,24 @@ impl Lexer {
                         // Add a Slash token
                     }
                 }
-                '=' => {
+                ':' => {
                     self.advance();
                     if self.current_char() == '=' {
                         self.advance();
-                        tokens.push(TokenInfo::new(Token::Equal, line, column));
+                        tokens.push(TokenInfo::new(Token::ColonEqual, line, column));
+                    } else {
+                        tokens.push(TokenInfo::new(Token::Colon, line, column));
+                    }
+                }
+                '=' => {
+                    self.advance();
                     // Add an Equal token (==)
+                    if self.current_char() == '=' {
+                        self.advance();
+                        tokens.push(TokenInfo::new(Token::Equal, line, column));
+                    } else if self.current_char() == '>' {
+                        self.advance();
+                        tokens.push(TokenInfo::new(Token::AssignRight, line, column));
                     } else {
                         tokens.push(TokenInfo::new(Token::Assign, line, column));
                         // Add an Assign token (=)
@@ -97,15 +109,23 @@ impl Lexer {
                         tokens.push(TokenInfo::new(Token::NotEqual, line, column));
                     // Add a NotEqual token (!=)
                     } else {
-                        panic!("Unexpected character '!' at line {line}, column {column}");
-                        // Error for lone '!'
+                        return Err(format!(
+                            "Unexpected character '!' at line {line}, column {column}"
+                        ));
                     }
                 }
                 '<' => {
                     self.advance();
                     if self.current_char() == '=' {
-                        self.advance();
-                        tokens.push(TokenInfo::new(Token::LessEqual, line, column));
+                        match self.current_char() {
+                            '>' => {
+                                self.advance();
+                                tokens.push(TokenInfo::new(Token::Imply, line, column));
+                            }
+                            _ => {
+                                tokens.push(TokenInfo::new(Token::LessEqual, line, column));
+                            }
+                        }
                     // Add a LessEqual token (<=)
                     } else if self.current_char() == '-' {
                         self.advance();
@@ -170,12 +190,12 @@ impl Lexer {
                     tokens.push(TokenInfo::new(Token::Newline, line, column)); // Add a Newline token
                 }
                 '"' => {
-                    let string_literal = self.scan_string(); // Parse a string literal
+                    let string_literal = self.scan_string()?; // Parse a string literal
                     tokens.push(TokenInfo::new(Token::String(string_literal), line, column));
                     // Add a String token
                 }
                 c if c.is_ascii_digit() => {
-                    let number = self.scan_number(); // Parse a number literal
+                    let number = self.scan_number()?; // Parse a number literal
                     tokens.push(TokenInfo::new(Token::Number(number), line, column));
                     // Add a Number token
                 }
@@ -185,18 +205,18 @@ impl Lexer {
                     tokens.push(TokenInfo::new(token, line, column)); // Add the token
                 }
                 _ => {
-                    panic!(
+                    return Err(format!(
                         "Unexpected character '{}' at line {}, column {}",
                         self.current_char(),
                         line,
                         column
-                    ); // Error for unknown character
+                    )); // Error for unknown character
                 }
             }
         }
 
         tokens.push(TokenInfo::new(Token::Eof, self.line, self.column)); // Add an EOF token at the end
-        tokens // Return the vector of tokens
+        Ok(tokens) // Return the vector of tokens
     }
 
     // Get the current character, or '\0' if at the end
@@ -245,7 +265,7 @@ impl Lexer {
     }
 
     // Scan and return a string literal (handles escape sequences)
-    fn scan_string(&mut self) -> String {
+    fn scan_string(&mut self) -> Result<String, String> {
         self.advance(); // Skip opening quote
         let mut value = String::new(); // Store the string value
 
@@ -270,18 +290,18 @@ impl Lexer {
         }
 
         if self.is_at_end() {
-            panic!(
+            return Err(format!(
                 "Unterminated string at line {} column {}",
                 self.line, self.column
-            ); // Error if string not closed
+            )); // Error if string not closed
         }
 
         self.advance(); // Skip closing quote
-        value // Return the string value
+        Ok(value) // Return the string value
     }
 
     // Scan and return a number literal as f64
-    fn scan_number(&mut self) -> f64 {
+    fn scan_number(&mut self) -> Result<f64, String> {
         let mut value = String::new(); // Store the number as a string
 
         while !self.is_at_end()
@@ -291,11 +311,11 @@ impl Lexer {
             self.advance(); // Move to next character
         }
 
-        value.parse().unwrap_or_else(|_| {
-            panic!(
+        value.parse().map_err(|_| {
+            format!(
                 "Invalid number '{}' at line {}, column {}",
                 value, self.line, self.column
-            ); // Error if not a valid number
+            ) // Error if not a valid number
         })
     }
 
@@ -315,21 +335,29 @@ impl Lexer {
 
     // Determine if a string is a keyword or an identifier
     fn keyword_or_identifier(&self, text: String) -> Token {
-        match text.to_lowercase().as_str() {
-            "let" => Token::Let,           // let keyword
-            "if" => Token::If,             // if keyword
-            "else" => Token::Else,         // else keyword
-            "while" => Token::While,       // while keyword
-            "break" => Token::Break,       // break keyword
-            "print" => Token::Print,       // print keyword
-            "function" => Token::Function, // function keyword
-            "true" => Token::True,         // true keyword
-            "false" => Token::False,       // false keyword
-            "return" => Token::Return,     // return keyword
-            "get" => Token::Get,           // get keyword for imports
-            "from" => Token::From,         // from keyword for imports
-            "<-" => Token::ArrowLeft,      // <- arrow token for imports
-            _ => Token::Identifier(text),  // Otherwise, it's an identifier
+        // Handle case-sensitive keywords first
+        match text.as_str() {
+            "printLn" => Token::PrintLn,   // printLn keyword (case-sensitive)
+            "printErr" => Token::PrintErr, // printErr keyword (case-sensitive)
+            _ => {
+                // Handle case-insensitive keywords
+                match text.to_lowercase().as_str() {
+                    "let" => Token::Let,           // let keyword
+                    "if" => Token::If,             // if keyword
+                    "else" => Token::Else,         // else keyword
+                    "while" => Token::While,       // while keyword
+                    "break" => Token::Break,       // break keyword
+                    "print" => Token::Print,       // print keyword
+                    "function" => Token::Function, // function keyword
+                    "true" => Token::True,         // true keyword
+                    "false" => Token::False,       // false keyword
+                    "return" => Token::Return,     // return keyword
+                    "get" => Token::Get,           // get keyword for imports
+                    "from" => Token::From,         // from keyword for imports
+                    "<-" => Token::ArrowLeft,      // <- arrow token for imports
+                    _ => Token::Identifier(text),  // Otherwise, it's an identifier
+                }
+            }
         }
     }
 }

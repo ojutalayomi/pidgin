@@ -1,34 +1,47 @@
-// Test new features: Objects, Date, readline, printErr
+// Test new features: Objects, Date, readLine, printLn, printErr
 
 // Test Object creation and manipulation
 let obj = Object();
-print "Created object: {}", obj;
+printLn "Created empty object: {}", obj;
+
+// Test Object with key-value pairs
+let person = Object("name", "Alice", "age", 25, "city", "Boston");
+let person1 = Object("name" => "Alice", "age" => 25, "city" => "Boston");
+printLn "Created person object: {} {}", person, person1;
+
+// Test object methods
+let value = person.get("name");
+printLn "Person name: {}", value;
+
+let has_age = person.has("age");
+printLn "Has age property: {}", has_age;
 
 // Test Date creation and methods
 let now = Date();
-print "Current date: {}", now;
+printLn "Current date: {}", now;
 
 let birthday = Date(2024, 1, 1);
-print "Birthday: {}", birthday;
+printLn "Birthday: {}", birthday;
 
 let formatted = birthday.format("%Y-%m-%d");
-print "Formatted birthday: {}", formatted;
+printLn "Formatted birthday: {}", formatted;
 
 let year = now.getYear();
 let month = now.getMonth();
 let day = now.getDay();
-print "Today is: {}/{}/{}", year, month, day;
+printLn "Today is: {}/{}/{}", year, month, day;
 
 // Test arrays with built-in methods
 let arr = {1, 2, 3};
-print "Array: {}", arr;
-print "Array length: {}", arr.length();
+printLn "Array: {}", arr;
+printLn "Array length: {}", arr.length();
 
 // Test error printing
-printErr("This is an error message {}", "test");
+printErr("This is an error message {}", person);
 
-// Test readline (uncomment to test interactively)
-// let input = readline();
-// print "You entered: {}", input;
+// Test readLine (uncomment to test interactively)
+print("What is your name? ");
+let input = readLine();
+print "You entered: {} \n", input;
 
 print "All tests completed!";

@@ -17,7 +17,7 @@ Your Pidgin compiler is now fully set up for automated GitHub releases! Here's w
 ### 3. Installation & Usage
 - **`install.sh`**: System-wide installation
 - **`run.sh`/`run.bat`**: Platform-specific runners
-- **`pidgin-compiler` command**: Available globally after installation
+- **`pidgin` command**: Available globally after installation
 
 ### 4. Documentation
 - **`INSTALLATION.md`**: How to install system-wide
@@ -52,7 +52,7 @@ git push origin v1.0.0
 ## 📁 File Structure Created
 
 ```
-pidgin-compiler/
+pidgin/
 ├── .github/workflows/
 │   ├── release.yml          # Automated release workflow
 │   └── test.yml             # Test workflow
@@ -67,8 +67,8 @@ pidgin-compiler/
 ├── PORTABLE_USAGE.md         # User guide
 ├── RELEASE_GUIDE.md          # Release guide
 ├── GITHUB_SETUP.md           # This file
-└── pidgin-compiler-dist/     # Local distribution
-    ├── pidgin-compiler       # Executable
+└── pidgin-dist/     # Local distribution
+    ├── pidgin       # Executable
     ├── run.sh                # Unix runner
     ├── run.bat               # Windows runner
     ├── examples/             # Example programs
@@ -97,11 +97,11 @@ pidgin-compiler/
 
 Each release will contain:
 
-- **`pidgin-compiler-linux-x86_64.zip`** - Linux (Intel/AMD)
-- **`pidgin-compiler-linux-aarch64.zip`** - Linux (ARM)
-- **`pidgin-compiler-macos-x86_64.zip`** - macOS (Intel)
-- **`pidgin-compiler-macos-aarch64.zip`** - macOS (Apple Silicon)
-- **`pidgin-compiler-windows-x86_64.zip`** - Windows (Intel/AMD)
+- **`pidgin-linux-x86_64.zip`** - Linux (Intel/AMD)
+- **`pidgin-linux-aarch64.zip`** - Linux (ARM)
+- **`pidgin-macos-x86_64.zip`** - macOS (Intel)
+- **`pidgin-macos-aarch64.zip`** - macOS (Apple Silicon)
+- **`pidgin-windows-x86_64.zip`** - Windows (Intel/AMD)
 
 ## 👥 How Users Get Started
 
@@ -124,7 +124,7 @@ Each release will contain:
    ```
 2. **Use globally**:
    ```bash
-   pidgin-compiler my-program.pg
+   pidgin my-program.pg
    ```
 
 ## 🎉 Benefits

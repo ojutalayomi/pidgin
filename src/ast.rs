@@ -72,6 +72,14 @@ pub enum Stmt {
         format: Expr,         // The format string expression
         arguments: Vec<Expr>, // The arguments to be formatted
     }, // Print statement
+    PrintLn {
+        format: Expr,         // The format string expression
+        arguments: Vec<Expr>, // The arguments to be formatted
+    }, // PrintLn statement
+    PrintErr {
+        format: Expr,         // The format string expression
+        arguments: Vec<Expr>, // The arguments to be formatted
+    }, // PrintErr statement
     Import {
         names: Vec<String>, // Names to import (can be single or multiple)
         module: String,     // Module file path

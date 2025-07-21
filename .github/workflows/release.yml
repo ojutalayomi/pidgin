@@ -14,15 +14,15 @@ jobs:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             platform: linux-x86_64
-            artifact_name: pidgin-compiler-linux-x86_64
+            artifact_name: pidgin-linux-x86_64
           - os: macos-latest
             target: x86_64-apple-darwin
             platform: macos-x86_64
-            artifact_name: pidgin-compiler-macos-x86_64
+            artifact_name: pidgin-macos-x86_64
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             platform: windows-x86_64
-            artifact_name: pidgin-compiler-windows-x86_64
+            artifact_name: pidgin-windows-x86_64
 
     runs-on: ${{ matrix.os }}
 
@@ -64,12 +64,12 @@ jobs:
 
       - name: Create zip archive (Windows)
         if: matrix.os == 'windows-latest'
-        run: Compress-Archive -Path "pidgin-compiler-${{ matrix.platform }}" -DestinationPath "${{ matrix.artifact_name }}.zip"
+        run: Compress-Archive -Path "pidgin-${{ matrix.platform }}" -DestinationPath "${{ matrix.artifact_name }}.zip"
         shell: powershell
 
       - name: Create zip archive (Unix)
         if: matrix.os != 'windows-latest'
-        run: zip -r "${{ matrix.artifact_name }}.zip" "pidgin-compiler-${{ matrix.platform }}"
+        run: zip -r "${{ matrix.artifact_name }}.zip" "pidgin-${{ matrix.platform }}"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -106,9 +106,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            pidgin-compiler-linux-x86_64.zip
-            pidgin-compiler-macos-x86_64.zip
-            pidgin-compiler-windows-x86_64.zip
+            pidgin-linux-x86_64.zip
+            pidgin-macos-x86_64.zip
+            pidgin-windows-x86_64.zip
           draft: false
           prerelease: false
           generate_release_notes: true

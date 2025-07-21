@@ -1,5 +1,5 @@
 [package]
-name = "pidgin-compiler"
+name = "pidgin"
 version = "0.1.17"
 rust-version = "1.70"
 

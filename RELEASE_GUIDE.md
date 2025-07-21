@@ -105,19 +105,19 @@ git tag v2.0.0
 
 The automated build creates distributions for:
 
-- **Linux x86_64**: `pidgin-compiler-linux-x86_64.zip`
-- **Linux ARM64**: `pidgin-compiler-linux-aarch64.zip`
-- **macOS Intel**: `pidgin-compiler-macos-x86_64.zip`
-- **macOS Apple Silicon**: `pidgin-compiler-macos-aarch64.zip`
-- **Windows x86_64**: `pidgin-compiler-windows-x86_64.zip`
+- **Linux x86_64**: `pidgin-linux-x86_64.zip`
+- **Linux ARM64**: `pidgin-linux-aarch64.zip`
+- **macOS Intel**: `pidgin-macos-x86_64.zip`
+- **macOS Apple Silicon**: `pidgin-macos-aarch64.zip`
+- **Windows x86_64**: `pidgin-windows-x86_64.zip`
 
 ## Distribution Contents
 
 Each distribution contains:
 
 ```
-pidgin-compiler-<platform>/
-├── pidgin-compiler          # Main executable
+pidgin-<platform>/
+├── pidgin          # Main executable
 ├── run.sh                   # Unix/Linux/macOS runner script
 ├── run.bat                  # Windows runner script
 ├── README.md                # Platform-specific instructions
@@ -168,7 +168,7 @@ Test the build process locally:
 ./scripts/create-distribution.sh test-platform ubuntu-latest
 
 # Check the output
-ls -la pidgin-compiler-test-platform/
+ls -la pidgin-test-platform/
 ```
 
 ## Release Notes
@@ -207,15 +207,15 @@ You can customize release notes by:
 
 ## Installation
 Download the appropriate distribution for your platform:
-- **Linux**: `pidgin-compiler-linux-x86_64.zip`
-- **macOS**: `pidgin-compiler-macos-x86_64.zip`
-- **Windows**: `pidgin-compiler-windows-x86_64.zip`
+- **Linux**: `pidgin-linux-x86_64.zip`
+- **macOS**: `pidgin-macos-x86_64.zip`
+- **Windows**: `pidgin-windows-x86_64.zip`
 
 ## Usage
 ```bash
 # Extract and run
-unzip pidgin-compiler-linux-x86_64.zip
-cd pidgin-compiler-linux-x86_64
+unzip pidgin-linux-x86_64.zip
+cd pidgin-linux-x86_64
 ./run.sh examples/hello.pg
 ```
 
@@ -246,7 +246,7 @@ To add a new platform:
 - os: new-os
   target: new-target
   platform: new-platform
-  artifact_name: pidgin-compiler-new-platform
+  artifact_name: pidgin-new-platform
 ```
 
 2. Update the distribution script if needed

@@ -14,18 +14,18 @@ NC='\033[0m' # No Color
 
 # Default installation directory
 INSTALL_DIR="/usr/local/bin"
-EXECUTABLE_NAME="pidgin-compiler"
+EXECUTABLE_NAME="pidgin"
 
 echo -e "${BLUE}Pidgin Compiler Installation${NC}"
 echo "================================"
 
 # Check if we're in a distribution directory (has the executable directly)
-if [ -f "pidgin-compiler" ]; then
+if [ -f "pidgin" ]; then
     echo -e "${GREEN}Found executable in current directory.${NC}"
-    EXECUTABLE_PATH="pidgin-compiler"
-elif [ -f "target/release/pidgin-compiler" ]; then
+    EXECUTABLE_PATH="pidgin"
+elif [ -f "target/release/pidgin" ]; then
     echo -e "${GREEN}Found release build.${NC}"
-    EXECUTABLE_PATH="target/release/pidgin-compiler"
+    EXECUTABLE_PATH="target/release/pidgin"
 else
     echo -e "${YELLOW}No executable found. Building from source...${NC}"
     if [ ! -f "Cargo.toml" ]; then
@@ -33,7 +33,7 @@ else
         exit 1
     fi
     cargo build --release
-    EXECUTABLE_PATH="target/release/pidgin-compiler"
+    EXECUTABLE_PATH="target/release/pidgin"
 fi
 
 # Check if running as root for system-wide installation
@@ -93,7 +93,7 @@ else
         echo "   cp $EXECUTABLE_PATH /path/to/directory/"
         echo ""
         echo "2. Make it executable:"
-        echo "   chmod +x /path/to/directory/pidgin-compiler"
+        echo "   chmod +x /path/to/directory/pidgin"
         echo ""
         echo "3. Or add the current directory to your PATH by adding this line to your shell config:"
         echo -e "${BLUE}export PATH=\"$PWD:\$PATH\"${NC}"

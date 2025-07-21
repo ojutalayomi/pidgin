@@ -8,24 +8,29 @@ A modern programming language compiler built in Rust that supports advanced prog
 
 ```bash
 # Run a program directly
-pidgin-compiler examples/hello.pg
+pidgin examples/hello.pg
 
 # Start interactive mode
-pidgin-compiler
+pidgin
 
 # Show debug information
-pidgin-compiler examples/hello.pg --tokens
-pidgin-compiler examples/hello.pg --ast
+pidgin examples/hello.pg --tokens
+pidgin examples/hello.pg --ast
 ```
 
 ### Install System-Wide
 
 ```bash
-# Install so you can use 'pidgin-compiler' from anywhere
+# Install so you can use 'pidgin' from anywhere
 ./install.sh
 
 # Or install system-wide (requires sudo)
 sudo ./install.sh
+```
+
+```powershell
+# Install so you can use 'pidgin' from anywhere for windows
+./install.bat
 ```
 
 ## Features
@@ -83,14 +88,19 @@ let day = birthday.getDay();               // Get day
 ### Object Operations
 ```pidgin
 let obj = Object();                        // Create empty object
+let person = Object("name", "John", "age", 30);  // Create object with key-value pairs
+let config = Object("enabled" => true, "port" => 8080);  // Create object with => syntax
 let keys = obj.keys();                     // Get object keys
 ```
 
 ### Built-in Functions
-- **`readline()`**: Read input from console
+- **`readLine()`**: Read input from console
 - **`printErr(message)`**: Print error messages to stderr
 - **`Date(...)`**: Create date objects
-- **`Object()`**: Create object containers
+- **`Object(...)`**: Create object containers with key-value pairs
+  - `Object()` - Create empty object
+  - `Object("key1", value1, "key2", value2, ...)` - Create object with comma-separated key-value pairs
+  - `Object("key1" => value1, "key2" => value2, ...)` - Create object with => syntax
 
 ### Module System
 ```pidgin
@@ -147,7 +157,7 @@ arrayIndex   → expression "[" expression "]"
 cargo run examples/hello.pg
 
 # Using installed compiler (after installation)
-pidgin-compiler examples/hello.pg
+pidgin examples/hello.pg
 ```
 
 ### Interactive REPL:
@@ -156,16 +166,16 @@ pidgin-compiler examples/hello.pg
 cargo run
 
 # Using installed compiler (after installation)
-pidgin-compiler
+pidgin
 ```
 
 ### Debug modes:
 ```bash
 # Show tokens
-pidgin-compiler --tokens examples/hello.pg
+pidgin examples/hello.pg --tokens
 
 # Show AST
-pidgin-compiler --ast examples/hello.pg
+pidgin examples/hello.pg --ast
 ```
 
 ## Example Programs

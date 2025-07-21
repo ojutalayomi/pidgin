@@ -45,7 +45,15 @@ impl Parser {
         }
         if self.match_token(&Token::Print) {
             // Check for print statement
-            return self.print_statement(); // Parse print statement
+            return self.print_statement("print"); // Parse print statement
+        }
+        if self.match_token(&Token::PrintLn) {
+            // Check for printLn statement
+            return self.print_statement("printLn"); // Parse printLn statement
+        }
+        if self.match_token(&Token::PrintErr) {
+            // Check for printErr statement
+            return self.print_statement("printErr"); // Parse printErr statement
         }
         if self.match_token(&Token::Let) {
             // Check for variable declaration
@@ -71,7 +79,7 @@ impl Parser {
     }
 
     // Parse a print statement
-    fn print_statement(&mut self) -> Result<Stmt, String> {
+    fn print_statement(&mut self, print_type: &str) -> Result<Stmt, String> {
         let (format_expr, arguments) = if self.match_token(&Token::LeftParen) {
             // Parenthesized form: print("{}", name3);
             let format_expr = self.expression()?;
@@ -92,9 +100,20 @@ impl Parser {
         };
 
         self.consume(&Token::Semicolon, "Expect ';' after value.")?;
-        Ok(Stmt::Print {
-            format: format_expr,
-            arguments,
+        Ok(match print_type {
+            "print" => Stmt::Print {
+                format: format_expr,
+                arguments,
+            },
+            "printLn" => Stmt::PrintLn {
+                format: format_expr,
+                arguments,
+            },
+            "printErr" => Stmt::PrintErr {
+                format: format_expr,
+                arguments,
+            },
+            _ => unreachable!(),
         })
     }
 
@@ -117,7 +136,11 @@ impl Parser {
                 if let Token::Identifier(name) = &name_token.token {
                     names.push(name.clone());
                 } else {
-                    return Err("Invalid identifier in import list".to_string());
+                    return Err(format!(
+                        "Invalid identifier in import list at line {line} column {column}",
+                        line = name_token.line,
+                        column = name_token.column
+                    ));
                 }
 
                 if !self.match_token(&Token::Comma) {
@@ -131,7 +154,11 @@ impl Parser {
             if let Token::Identifier(name) = &name_token.token {
                 names.push(name.clone());
             } else {
-                return Err("Invalid identifier after GET".to_string());
+                return Err(format!(
+                    "Invalid identifier after GET at line {line} column {column}",
+                    line = name_token.line,
+                    column = name_token.column
+                ));
             }
         }
 
@@ -157,7 +184,11 @@ impl Parser {
         if let Token::Identifier(part) = &first_part.token {
             module_parts.push(part.clone());
         } else {
-            return Err("Invalid module path".to_string());
+            return Err(format!(
+                "Invalid module path at line {line} column {column}",
+                line = first_part.line,
+                column = first_part.column
+            ));
         }
 
         // Handle additional parts with dots (e.g., math.pg)
@@ -167,7 +198,11 @@ impl Parser {
             if let Token::Identifier(part) = &part_token.token {
                 module_parts.push(part.clone());
             } else {
-                return Err("Invalid identifier after dot in module path".to_string());
+                return Err(format!(
+                    "Invalid identifier after dot in module path at line {line} column {column}",
+                    line = part_token.line,
+                    column = part_token.column
+                ));
             }
         }
 
@@ -184,7 +219,11 @@ impl Parser {
         let name = if let Token::Identifier(n) = &name_token.token {
             n.clone() // Get the variable name
         } else {
-            return Err("Invalid variable name.".to_string()); // Error if not an identifier
+            return Err(format!(
+                "Invalid variable name. at line {line} column {column}",
+                line = name_token.line,
+                column = name_token.column
+            )); // Error if not an identifier
         };
         let initializer = if self.match_token(&Token::Assign) {
             // Check for initializer
@@ -202,7 +241,11 @@ impl Parser {
         let name = if let Token::Identifier(n) = &name_token.token {
             n.clone() // Get the function name
         } else {
-            return Err("Invalid function name.".to_string()); // Error if not an identifier
+            return Err(format!(
+                "Invalid function name. at line {line} column {column}",
+                line = name_token.line,
+                column = name_token.column
+            )); // Error if not an identifier
         };
 
         self.consume(&Token::LeftParen, "Expect '(' after function name.")?; // Expect '('
@@ -216,7 +259,11 @@ impl Parser {
                 if let Token::Identifier(param_name) = &param_token.token {
                     parameters.push(param_name.clone()); // Add parameter to list
                 } else {
-                    return Err("Invalid parameter name.".to_string()); // Error if not identifier
+                    return Err(format!(
+                        "Invalid parameter name. at line {line} column {column}",
+                        line = param_token.line,
+                        column = param_token.column
+                    )); // Error if not identifier
                 }
 
                 if !self.match_token(&Token::Comma) {
@@ -320,7 +367,11 @@ impl Parser {
                     value: Box::new(value),
                 }); // Return Assignment expression
             }
-            return Err("Invalid assignment target.".to_string()); // Error if not an identifier
+            return Err(format!(
+                "Invalid assignment target. at line {line} column {column}",
+                line = self.previous().line,
+                column = self.previous().column
+            )); // Error if not an identifier
         }
         Ok(expr) // Return the parsed expression
     }
@@ -475,7 +526,12 @@ impl Parser {
                 self.consume(&Token::RightBrace, "Expect '}' after array elements.")?;
                 Ok(Expr::DynamicArray(elements))
             }
-            _ => Err("Expect expression.".to_string()), // Error for invalid primary
+            _ => Err(format!(
+                "Expect expression. Got {token:?} at line {line} column {column}",
+                token = token.token,
+                line = token.line,
+                column = token.column
+            )), // Error for invalid primary
         }?;
 
         // Check for function calls
@@ -485,11 +541,15 @@ impl Parser {
             // Parse arguments
             let mut arguments = Vec::new();
             if !self.check(&Token::RightParen) {
-                loop {
-                    arguments.push(self.expression()?);
-                    if !self.match_token(&Token::Comma) {
-                        break;
+                // Check if this is an Object() call to support => syntax
+                if let Expr::Identifier(name) = &expr {
+                    if name == "Object" {
+                        arguments = self.parse_object_arguments()?;
+                    } else {
+                        arguments = self.parse_regular_arguments()?;
                     }
+                } else {
+                    arguments = self.parse_regular_arguments()?;
                 }
             }
 
@@ -499,7 +559,7 @@ impl Parser {
             if let Expr::Identifier(name) = expr {
                 expr = Expr::FunctionCall { name, arguments };
             } else {
-                return Err("Only identifiers can be called as functions.".to_string());
+                return Err(format!("Only identifiers can be called as functions. Got {expr:?} at line {line} column {column}", expr = expr, line = token.line, column = token.column));
             }
         }
 
@@ -509,7 +569,13 @@ impl Parser {
             let method_name = match &self.peek().token {
                 Token::Identifier(name) => name.clone(),
                 Token::Get => "get".to_string(), // Handle 'get' as method name
-                _ => return Err("Expect method name after '.'.".to_string()),
+                _ => {
+                    return Err(format!(
+                        "Expect method name after '.'. at line {line} column {column}",
+                        line = self.peek().line,
+                        column = self.peek().column
+                    ))
+                }
             };
             self.advance(); // consume method name
 
@@ -575,7 +641,12 @@ impl Parser {
                 self.consume(&Token::RightParen, "Expect ')' after argument")?;
                 arg
             } else {
-                return Err(format!("Unsupported method: {method_name}"));
+                return Err(format!(
+                    "Unsupported method: {method_name} at line {line} column {column}",
+                    method_name = method_name,
+                    line = token.line,
+                    column = token.column
+                ));
             };
 
             expr = Expr::MethodCall {
@@ -609,7 +680,11 @@ impl Parser {
                 self.consume(&Token::RightBrace, "Expect '}' after variable name")?;
                 Ok(var)
             } else {
-                Err("Expect variable name in transform".to_string())
+                Err(format!(
+                    "Expect variable name in transform at line {line} column {column}",
+                    line = self.peek().line,
+                    column = self.peek().column
+                ))
             }
         } else {
             // Continue without requiring {var}
@@ -618,7 +693,12 @@ impl Parser {
                 self.advance();
                 Ok(var)
             } else {
-                Err(format!("Expect '{transform_type}' pattern in transform"))
+                Err(format!(
+                    "Expect '{transform_type}' pattern in transform at line {line} column {column}",
+                    transform_type = transform_type,
+                    line = self.peek().line,
+                    column = self.peek().column
+                ))
             }
         }
     }
@@ -689,5 +769,43 @@ impl Parser {
                 column = token.column
             )), // Error otherwise
         }
+    }
+
+    // Parse regular function arguments (comma-separated)
+    fn parse_regular_arguments(&mut self) -> Result<Vec<Expr>, String> {
+        let mut arguments = Vec::new();
+        loop {
+            arguments.push(self.expression()?);
+            if !self.match_token(&Token::Comma) {
+                break;
+            }
+        }
+        Ok(arguments)
+    }
+
+    // Parse Object() arguments supporting both comma-separated and => syntax
+    fn parse_object_arguments(&mut self) -> Result<Vec<Expr>, String> {
+        let mut arguments = Vec::new();
+        loop {
+            // Parse the first expression
+            let first = self.expression()?;
+
+            // Check if next token is =>
+            if self.match_token(&Token::AssignRight) {
+                // This is key => value syntax
+                let value = self.expression()?;
+                arguments.push(first);
+                arguments.push(value);
+            } else {
+                // This is regular comma-separated syntax (key, value, key, value, ...)
+                arguments.push(first);
+            }
+
+            // Check for comma separator
+            if !self.match_token(&Token::Comma) {
+                break;
+            }
+        }
+        Ok(arguments)
     }
 }

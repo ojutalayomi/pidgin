@@ -18,12 +18,12 @@ This guide explains how to create portable distributions of the Pidgin compiler 
 
 3. **Test the distribution:**
    ```bash
-   cd pidgin-compiler-dist
+   cd pidgin-dist
    ./run.sh examples/hello.pg
    ```
 
 4. **Distribute the zip file:**
-   - Copy `pidgin-compiler-Darwin-x86_64.zip` (or similar) to any computer
+   - Copy `pidgin-Darwin-x86_64.zip` (or similar) to any computer
    - Extract it
    - Run: `./run.sh examples/hello.pg`
 
@@ -35,11 +35,11 @@ This guide explains how to create portable distributions of the Pidgin compiler 
    ```
 
 2. **Distribute the appropriate zip file for each platform:**
-   - `pidgin-compiler-linux-x86_64.zip` - Linux (Intel/AMD)
-   - `pidgin-compiler-linux-aarch64.zip` - Linux (ARM)
-   - `pidgin-compiler-macos-x86_64.zip` - macOS (Intel)
-   - `pidgin-compiler-macos-aarch64.zip` - macOS (Apple Silicon)
-   - `pidgin-compiler-windows-x86_64.zip` - Windows (Intel/AMD)
+   - `pidgin-linux-x86_64.zip` - Linux (Intel/AMD)
+   - `pidgin-linux-aarch64.zip` - Linux (ARM)
+   - `pidgin-macos-x86_64.zip` - macOS (Intel)
+   - `pidgin-macos-aarch64.zip` - macOS (Apple Silicon)
+   - `pidgin-windows-x86_64.zip` - Windows (Intel/AMD)
 
 ## Distribution Methods
 
@@ -52,8 +52,8 @@ Use the `distribute.sh` script to create a distribution for the current platform
 ```
 
 This creates:
-- `pidgin-compiler-dist/` - Directory with everything needed
-- `pidgin-compiler-<platform>-<arch>.zip` - Portable archive
+- `pidgin-dist/` - Directory with everything needed
+- `pidgin-<platform>-<arch>.zip` - Portable archive
 
 ### Method 2: Multi-Platform Distribution
 
@@ -77,7 +77,7 @@ This requires:
 2. **Copy the executable and examples:**
    ```bash
    mkdir my-distribution
-   cp target/release/pidgin-compiler my-distribution/
+   cp target/release/pidgin my-distribution/
    cp -r examples my-distribution/
    ```
 
@@ -85,7 +85,7 @@ This requires:
    ```bash
    # For Unix-like systems
    echo '#!/bin/bash
-   ./pidgin-compiler "$@"' > my-distribution/run.sh
+   ./pidgin "$@"' > my-distribution/run.sh
    chmod +x my-distribution/run.sh
    ```
 
@@ -95,20 +95,20 @@ This requires:
 
 1. **Extract the distribution:**
    ```bash
-   unzip pidgin-compiler-linux-x86_64.zip
-   cd pidgin-compiler-linux-x86_64
+   unzip pidgin-linux-x86_64.zip
+   cd pidgin-linux-x86_64
    ```
 
 2. **Make executable:**
    ```bash
-   chmod +x pidgin-compiler
+   chmod +x pidgin
    chmod +x run.sh
    ```
 
 3. **Run programs:**
    ```bash
    ./run.sh examples/hello.pg
-   ./pidgin-compiler examples/hello.pg
+   ./pidgin examples/hello.pg
    ./run.sh  # Start interactive REPL
    ```
 
@@ -117,14 +117,14 @@ This requires:
 1. **Extract the distribution:**
    ```cmd
    # Use Windows Explorer or:
-   powershell Expand-Archive pidgin-compiler-windows-x86_64.zip
-   cd pidgin-compiler-windows-x86_64
+   powershell Expand-Archive pidgin-windows-x86_64.zip
+   cd pidgin-windows-x86_64
    ```
 
 2. **Run programs:**
    ```cmd
    run.bat examples\hello.pg
-   pidgin-compiler.exe examples\hello.pg
+   pidgin.exe examples\hello.pg
    run.bat  # Start interactive REPL
    ```
 
@@ -137,8 +137,8 @@ This requires:
 sudo ./install.sh
 
 # Or manually:
-sudo cp target/release/pidgin-compiler /usr/local/bin/
-sudo chmod +x /usr/local/bin/pidgin-compiler
+sudo cp target/release/pidgin /usr/local/bin/
+sudo chmod +x /usr/local/bin/pidgin
 ```
 
 ### Local Installation
@@ -158,8 +158,8 @@ Just extract the distribution and run from the directory - no installation neede
 A typical distribution contains:
 
 ```
-pidgin-compiler-dist/
-├── pidgin-compiler          # Main executable
+pidgin-dist/
+├── pidgin          # Main executable
 ├── run.sh                   # Unix/Linux/macOS runner script
 ├── run.bat                  # Windows runner script
 ├── install.sh               # Installation script
@@ -175,7 +175,7 @@ pidgin-compiler-dist/
 
 ### Permission Denied
 ```bash
-chmod +x pidgin-compiler
+chmod +x pidgin
 chmod +x run.sh
 ```
 
@@ -187,7 +187,7 @@ chmod +x run.sh
 ### Executable Not Found
 - Verify the executable exists in the distribution
 - Check that it's the correct architecture for your system
-- Try running it directly: `./pidgin-compiler examples/hello.pg`
+- Try running it directly: `./pidgin examples/hello.pg`
 
 ### Cross-Platform Issues
 - Use the appropriate distribution for your platform
@@ -233,8 +233,8 @@ jobs:
       - run: ./distribute.sh
       - uses: actions/upload-artifact@v2
         with:
-          name: pidgin-compiler-${{ matrix.os }}
-          path: pidgin-compiler-*.zip
+          name: pidgin-${{ matrix.os }}
+          path: pidgin-*.zip
 ```
 
 ## Security Considerations

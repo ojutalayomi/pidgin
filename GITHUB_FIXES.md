@@ -28,19 +28,19 @@ This document summarizes the fixes made to resolve GitHub Actions issues.
 
 **Problem**: The distribution script was looking for executables in the wrong path:
 ```bash
-cp target/*/release/pidgin-compiler  # This failed
+cp target/*/release/pidgin  # This failed
 ```
 
 **Solution**: Updated `scripts/create-distribution.sh` to handle different target paths correctly:
 
 ```bash
 # For Unix-like systems, try multiple possible paths
-if [ -f "target/release/pidgin-compiler" ]; then
-    cp target/release/pidgin-compiler "pidgin-compiler-$PLATFORM/"
-elif [ -f "target/x86_64-unknown-linux-gnu/release/pidgin-compiler" ]; then
-    cp target/x86_64-unknown-linux-gnu/release/pidgin-compiler "pidgin-compiler-$PLATFORM/"
-elif [ -f "target/aarch64-unknown-linux-gnu/release/pidgin-compiler" ]; then
-    cp target/aarch64-unknown-linux-gnu/release/pidgin-compiler "pidgin-compiler-$PLATFORM/"
+if [ -f "target/release/pidgin" ]; then
+    cp target/release/pidgin "pidgin-$PLATFORM/"
+elif [ -f "target/x86_64-unknown-linux-gnu/release/pidgin" ]; then
+    cp target/x86_64-unknown-linux-gnu/release/pidgin "pidgin-$PLATFORM/"
+elif [ -f "target/aarch64-unknown-linux-gnu/release/pidgin" ]; then
+    cp target/aarch64-unknown-linux-gnu/release/pidgin "pidgin-$PLATFORM/"
 # ... and so on for other targets
 ```
 
@@ -58,7 +58,7 @@ elif [ -f "target/aarch64-unknown-linux-gnu/release/pidgin-compiler" ]; then
   run: |
     chmod +x scripts/create-distribution.sh
     ./scripts/create-distribution.sh test-platform ubuntu-latest
-    ls -la pidgin-compiler-test-platform/
+    ls -la pidgin-test-platform/
 ```
 
 ## Files Modified
@@ -86,7 +86,7 @@ The fixes have been tested locally:
 ./scripts/create-distribution.sh test-platform ubuntu-latest
 
 # Verify the distribution works
-cd pidgin-compiler-test-platform
+cd pidgin-test-platform
 ./run.sh examples/hello.pg
 # Output: 30, Hello, World!, etc.
 ```

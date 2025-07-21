@@ -1,0 +1,49 @@
+// Test full Object() implementation with key-value pairs
+
+// Create empty object
+let empty_obj = Object();
+printLn "Empty object: {}", empty_obj;
+
+// Create object with string keys and values
+let person = Object("name", "John", "age", 30, "city", "New York");
+printLn "Person object: {}", person;
+
+// Create object with mixed key types
+let config = Object("enabled", true, "port", 8080, "host", "localhost", "timeout", 30.5);
+printLn "Config object: {}", config;
+
+// Create object with nested values
+let data = Object("numbers", {1, 2, 3}, "text", "Hello World", "active", true);
+printLn "Data object: {}", data;
+
+// Test object methods
+let test_obj = Object("a", 1, "b", 2, "c", 3);
+
+// Test get method
+let value_a = test_obj.get("a");
+printLn "Value of 'a': {}", value_a;
+
+let value_d = test_obj.get("d");
+printLn "Value of 'd' (non-existent): {}", value_d;
+
+// Test has method
+let has_a = test_obj.has("a");
+let has_d = test_obj.has("d");
+printLn "Has 'a': {}", has_a;
+printLn "Has 'd': {}", has_d;
+
+// Test set method
+let updated_obj = test_obj.set("d", 4);
+printLn "Updated object: {}", updated_obj;
+
+// Test keys method
+let keys = test_obj.keys();
+printLn "Object keys: {}", keys;
+
+// Test with variables as keys and values
+let key1 = "dynamic_key";
+let value1 = 42;
+let dynamic_obj = Object(key1, value1, "static_key", "static_value");
+printLn "Dynamic object: {}", dynamic_obj;
+
+printLn "All object tests completed!"; 

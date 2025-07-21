@@ -1,0 +1,47 @@
+// Test the new => syntax for Object() creation
+
+printLn "Testing Object() with => syntax...";
+
+// Test => syntax with string keys
+let person1 = Object("name" => "John", "age" => 30, "city" => "New York");
+printLn "Person1 (=> syntax): {}", person1;
+
+// Test => syntax with mixed key types
+let config1 = Object("enabled" => true, "port" => 8080, "host" => "localhost");
+printLn "Config1 (=> syntax): {}", config1;
+
+// Test => syntax with nested values
+let data1 = Object("numbers" => {1, 2, 3}, "text" => "Hello World", "active" => true);
+printLn "Data1 (=> syntax): {}", data1;
+
+// Compare with traditional comma-separated syntax
+let person2 = Object("name", "John", "age", 30, "city", "New York");
+printLn "Person2 (comma syntax): {}", person2;
+
+let config2 = Object("enabled", true, "port", 8080, "host", "localhost");
+printLn "Config2 (comma syntax): {}", config2;
+
+// Test mixed syntax (not recommended but should work)
+let mixed = Object("a" => 1, "b", 2, "c" => 3);
+printLn "Mixed syntax: {}", mixed;
+
+// Test with variables
+let key1 = "dynamic_key";
+let value1 = 42;
+let dynamic = Object(key1 => value1, "static_key" => "static_value");
+printLn "Dynamic with => syntax: {}", dynamic;
+
+// Test object methods work the same
+let test_obj = Object("x" => 10, "y" => 20, "z" => 30);
+printLn "Test object: {}", test_obj;
+
+let x_value = test_obj.get("x");
+printLn "Value of 'x': {}", x_value;
+
+let has_y = test_obj.has("y");
+printLn "Has 'y': {}", has_y;
+
+let keys = test_obj.keys();
+printLn "Object keys: {}", keys;
+
+printLn "All => syntax tests completed!"; 

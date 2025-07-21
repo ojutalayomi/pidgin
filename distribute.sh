@@ -41,12 +41,12 @@ if [ -f "scripts/create-distribution.sh" ]; then
     
     # Create zip archive
     echo "Creating distribution archive..."
-    zip -r "pidgin-compiler-$PLATFORM.zip" "pidgin-compiler-$PLATFORM"
+    zip -r "pidgin-$PLATFORM.zip" "pidgin-$PLATFORM"
     
     echo "Distribution created successfully!"
     echo "Files created:"
-    echo "  - pidgin-compiler-$PLATFORM/ (distribution directory)"
-    echo "  - pidgin-compiler-$PLATFORM.zip (archive)"
+    echo "  - pidgin-$PLATFORM/ (distribution directory)"
+    echo "  - pidgin-$PLATFORM.zip (archive)"
     echo ""
     echo "To distribute:"
     echo "  1. Copy the zip file to any computer"

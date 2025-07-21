@@ -41,9 +41,9 @@ build_for_target() {
     
     # Copy the executable
     if [[ "$target" == *"windows"* ]]; then
-        cp "target/$target/release/pidgin-compiler.exe" "$platform_dir/"
+        cp "target/$target/release/pidgin.exe" "$platform_dir/"
     else
-        cp "target/$target/release/pidgin-compiler" "$platform_dir/"
+        cp "target/$target/release/pidgin" "$platform_dir/"
     fi
     
     # Copy examples
@@ -66,11 +66,11 @@ if "%~1"=="" (
 
 REM Get the directory where this script is located
 set SCRIPT_DIR=%~dp0
-set EXECUTABLE=%SCRIPT_DIR%pidgin-compiler.exe
+set EXECUTABLE=%SCRIPT_DIR%pidgin.exe
 
 REM Check if the executable exists
 if not exist "%EXECUTABLE%" (
-    echo Error: pidgin-compiler.exe not found in %SCRIPT_DIR%
+    echo Error: pidgin.exe not found in %SCRIPT_DIR%
     exit /b 1
 )
 
@@ -93,11 +93,11 @@ fi
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-EXECUTABLE="$SCRIPT_DIR/pidgin-compiler"
+EXECUTABLE="$SCRIPT_DIR/pidgin"
 
 # Check if the executable exists
 if [ ! -f "$EXECUTABLE" ]; then
-    echo "Error: pidgin-compiler executable not found in $SCRIPT_DIR"
+    echo "Error: pidgin executable not found in $SCRIPT_DIR"
     exit 1
 fi
 
@@ -129,7 +129,7 @@ run.bat examples\hello.pg
 
 ### Direct execution:
 ```cmd
-pidgin-compiler.exe examples\hello.pg
+pidgin.exe examples\hello.pg
 ```
 EOF
     else
@@ -141,7 +141,7 @@ EOF
 
 ### Direct execution:
 ```bash
-./pidgin-compiler examples/hello.pg
+./pidgin examples/hello.pg
 ```
 EOF
     fi
@@ -297,7 +297,7 @@ cd "$BUILDS_DIR"
 for platform in */; do
     platform=${platform%/}
     echo "Creating archive for $platform..."
-    zip -r "../pidgin-compiler-$platform.zip" "$platform"
+    zip -r "../pidgin-$platform.zip" "$platform"
 done
 
 cd ..
@@ -305,7 +305,7 @@ cd ..
 echo ""
 echo "Build completed successfully!"
 echo "Distribution archives created:"
-for archive in pidgin-compiler-*.zip; do
+for archive in pidgin-*.zip; do
     if [ -f "$archive" ]; then
         echo "  - $archive"
     fi
